@@ -4,7 +4,7 @@ const asyncHandler = (requestHandler) => {
     }
 }
 
-export {asyncHandler}
+export default asyncHandler
 
 // const asyncHandlerArrow = (fn) => async (req, res, next) => {
 //     try {
