@@ -1,5 +1,5 @@
 import dotenv from "dotenv";
-
+// this file has the code for how backend is connected to MongoDB by connection String 
 import mongoose from "mongoose";
 import { DB_NAME } from "../constant.js";
 import express from "express";

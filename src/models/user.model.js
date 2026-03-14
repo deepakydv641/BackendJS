@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import jwt from "jsonwebtoken";
+import bcrypt from "bcrypt";
 
 const userSchema=mongoose.Schema({
     username:{
@@ -42,5 +44,44 @@ const userSchema=mongoose.Schema({
         type:String
     }
 },{timestamps:true})
+
+userSchema.pre("save", async function(next){            // this hash the password  whenever the password will be modified
+    if(!this.isModified("password")) return next();
+                                                        // here i am performing password hashing because when Databas egets leak then at that time password will not be get leaked
+    this.password=await bcrypt.hash(this.password,10);  // bcryt ke algo mein time lagta hai issliye await ka use kiya hai
+
+    next()
+})
+
+userSchema.methods.isPasswordCorrect=async function(password){  
+    return await bcrypt.compare(this.password,password)         // again bcrypt waale task mein time lgta hai so we will use await here
+}
+
+userSchema.methods.generateAccessToken=function(){
+    return jwt.sign(
+        {
+            _id:this._id,
+            email:this.email,
+            username:this.username,
+            fullName:this.fullName
+        },
+        process.env.ACCESS_TOKEN_SECRET,
+        {
+            expiresIn:process.env.ACCESS_TOKEN_EXPIRY
+        }
+    )
+}
+
+userSchema.methods.generateRefreshToken=function(){
+    return jwt.sign(
+        {
+            _id:this._id
+        },
+        process.env.REFRESH_TOKEN_SECRET,
+        {
+            expiresIn:process.env.REFRESH_TOKEN_EXPIRY
+        }
+    )
+}
 
 export const user = mongoose.model("User",userSchema)
