@@ -1,3 +1,7 @@
+// ✅ dotenv MUST be the first import
+import dotenv from "dotenv";
+dotenv.config({ path: './.env' });  // Load env before anything else
+
 import ConnectDB from "./db/index.js";
 import app from "./app.js";
 

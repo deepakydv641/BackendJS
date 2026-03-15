@@ -18,9 +18,9 @@ const uploadOnCloudinary = async (localfilepath) => {       // file flow: user->
         return response
     } catch (error) {
         console.error("Cloudinary Upload Error:", error);
-        // if (fs.existsSync(localfilepath)) {
-        //     fs.unlinkSync(localfilepath)  // user upload but failed to upload on cloudinary so delete the local file because it causes memory issues
-        // }
+        if (fs.existsSync(localfilepath)) {
+            fs.unlinkSync(localfilepath)  // user upload but failed to upload on cloudinary so delete the local file because it causes memory issues
+        }
         return null
     }
 }
