@@ -8,15 +8,15 @@ if (!fs.existsSync(tempDir)) {
     fs.mkdirSync(tempDir, { recursive: true });
 }
 
-// multer 2.x diskStorage: destination and filename return values directly (no cb)
+// Reverted to multer v1.4.x callback pattern
 const storage = multer.diskStorage({
-    destination: function (req, file) {
-        return tempDir;
+    destination: function (req, file, cb) {
+        cb(null, tempDir);
     },
-    filename: function (req, file) {
+    filename: function (req, file, cb) {
         // Add a timestamp to avoid filename collisions
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        return uniqueSuffix + "-" + file.originalname;
+        cb(null, uniqueSuffix + "-" + file.originalname);
     }
 });
 

@@ -20,6 +20,9 @@ app.use("/api/v1/users", router)
 
 // Global error handler — catches errors thrown by asyncHandler
 app.use((err, req, res, next) => {
+    console.error("Error occurred:", err);
+    console.error("Stack trace:", err.stack);
+
     const statusCode = err.statusCode || 500;
     res.status(statusCode).json({
         success: false,

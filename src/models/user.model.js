@@ -45,12 +45,10 @@ const userSchema = mongoose.Schema({
     }
 }, { timestamps: true })
 
-userSchema.pre("save", async function (next) {            // this hash the password  whenever the password will be modified
-    if (!this.isModified("password")) return next();
-    // here i am performing password hashing because when Databas egets leak then at that time password will not be get leaked
-    this.password = await bcrypt.hash(this.password, 10);  // bcryt ke algo mein time lagta hai issliye await ka use kiya hai
+userSchema.pre("save", async function () {            // this hash the password  whenever the password will be modified
+    if (!this.isModified("password")) return;
 
-    next()
+    this.password = await bcrypt.hash(this.password, 10);
 })
 
 userSchema.methods.isPasswordCorrect = async function (password) {

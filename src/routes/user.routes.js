@@ -16,7 +16,8 @@ router.route("/register").post(
 );
 
 console.log("Login route registered");
-router.route("/login").post(loginUser);
+// Use upload.none() to accept form-data that has no files, only text fields
+router.route("/login").post(upload.none(), loginUser);
 
 console.log("Logout route registered");
 router.route("/logout").post(verifyJWT, logoutUser);
