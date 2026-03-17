@@ -1,24 +1,13 @@
-import dotenv from "dotenv";
-// this file has the code for how backend is connected to MongoDB by connection String 
+// This file only connects to MongoDB — server startup is handled in src/index.js
 import mongoose from "mongoose";
 import { DB_NAME } from "../constant.js";
-import express from "express";
-import app from "../app.js";
-
-dotenv.config({ path: './.env' });
 
 const ConnectDB = async () => {
     try {
-        await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
-        app.on("error", (error) => {
-            console.log("Error idhar hai: ", error)
-            throw error
-        })
-        app.listen(process.env.PORT || 8000, () => {
-            console.log('MongoDB connected successfully!!')
-        })
+        const connectionInstance = await mongoose.connect(`${process.env.MONGODB_URI}/${DB_NAME}`)
+        console.log(`MongoDB connected successfully!! DB Host: ${connectionInstance.connection.host}`);
     } catch (error) {
-        console.error("Error hai:", error);
+        console.error("MongoDB connection error:", error);
         process.exit(1);
     }
 };
