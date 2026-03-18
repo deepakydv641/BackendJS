@@ -313,5 +313,94 @@ const updateAccountDetails = asyncHandler(async (req, res) => {
         .json(new ApiResponse(200, DB_user, "Account details updated successfully"))
 });
 
+const updateAvatar = asyncHandler(async (req, res) => {
 
-export { registerUser, loginUser, logoutUser, getRefreshedAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails }
+    // Taking the Input from the user taking the path of the file from the req.files
+    const { avatarLocalPath } = req.files?.path
+
+    if (!avatarLocalPath) {
+        throw new ApiError(400, "avatar is required")
+    }
+
+    // for updating the avatar image obviously u will have delete the already uploaded image previously
+
+    const newAvatar = await uploadOnCloudinary(avatarLocalPath)
+
+    if (!newAvatar.url) {
+        throw new ApiError(400, "Error, while uploading , avatar is not uploaded")
+    }
+
+    const DB_user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                avatar: newAvatar.url
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                DB_user,
+                "Avatar updated successfully"
+            )
+        )
+})
+
+
+const updateCoverImage = asyncHandler(async (req, res) => {
+
+    // Taking the Input from the user taking the path of the file from the req.files
+    const { CoverImageLocalPath } = req.files?.path
+
+    if (!CoverImageLocalPath) {
+        throw new ApiError(400, "CoverImage is required")
+    }
+
+    // for updating the CoverImage image obviously u will have delete the already uploaded image previously
+
+    const newCoverImage = await uploadOnCloudinary(CoverImageLocalPath)
+
+    if (!newCoverImage.url) {
+        throw new ApiError(400, "Error, while uploading , CoverImage is not uploaded")
+    }
+
+    const DB_user = await User.findByIdAndUpdate(
+        req.user._id,
+        {
+            $set: {
+                CoverImage: newCoverImage.url
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                DB_user,
+                "CoverImage updated successfully"
+            )
+        )
+})
+
+
+export {
+    registerUser,
+    loginUser,
+    logoutUser,
+    getRefreshedAccessToken,
+    changeCurrentPassword,
+    getCurrentUser,
+    updateAccountDetails,
+    updateCoverImage,
+    updateAvatar
+}
