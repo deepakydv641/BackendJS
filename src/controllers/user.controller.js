@@ -224,7 +224,94 @@ const getRefreshedAccessToken = asyncHandler(async (req, res) => {
 
 })
 
+const changeCurrentPassword = asyncHandler(async (req, res) => {
+
+    // taking inputs from the req.body to change the password
+    const { oldPassword, newPassword } = req.body
+
+    // both oldpassword and new password are required to change the current password
+    if (!oldPassword || !newPassword) {
+        throw new ApiError(400, "oldPassword and newPassword are required")
+    }
+
+    // i can change the password only when i am logged in so i would have done verifyJWT middleware before this controller
+    // so i can access the req.user
+
+    // req.user will give me the current user
+    // now i can find the id of the user form req.user._id  then i can find the user from database with this id
+
+    const DB_user = await User.findById(req.user?._id)
+
+    if (!DB_user) {
+        throw new ApiError(400, "Invalid user")
+    }
+
+    // now i will have to check the old password should match with password saved in the database 
+    const isPasswordValid = await DB_user.isPasswordCorrect(oldPassword)
+
+    if (!isPasswordValid) {
+        throw new ApiError(401, "Invalid Old Password")
+    }
+
+    // now old password matches with the passowrd in Databse so i can change the password
+
+    DB_user.password = newPassword
+    await DB_user.save({ validateBeforeSave: true })
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Password Changed Successfully!!"
+            )
+        )
+})
+
+const getCurrentUser = asyncHandler(async (req, res) => {
+    // assuming you have called jwtVerify middleware and now you have the access of req.user
+    // in jwtVerify we check that if the user is logged in or not 
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {
+                    User: req.user
+                }, // here u have get the current user from jwtVerify middleware
+                "Current user fetched successfully!!"
+            )
+        )
+
+})
+
+const updateAccountDetails = asyncHandler(async (req, res) => {
+
+    const { username, email } = req.body
+
+    if (!username || !email) {
+        throw new ApiError(400, "username and email are required")
+    }
+
+    // assuming u have called auth middleware now u have acces of req.user._id
+
+    const DB_user = await User.findByIdAndUpdate(
+        req.user?._id,
+        {
+            $set: {
+                username: username,
+                email: email
+            }
+        },
+        {
+            new: true
+        }
+    ).select("-password")
+
+    return res
+        .status(200)
+        .json(new ApiResponse(200, DB_user, "Account details updated successfully"))
+});
 
 
-
-export { registerUser, loginUser, logoutUser, getRefreshedAccessToken }
+export { registerUser, loginUser, logoutUser, getRefreshedAccessToken, changeCurrentPassword, getCurrentUser, updateAccountDetails }

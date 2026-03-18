@@ -57,3 +57,6 @@ This document summarizes the bugs, errors, and architectural issues identified a
 - **Issue**: Postman requests taking >5 seconds.
 - **Cause**: Inefficient error handling and unhandled async rejections causing the server to hang.
 - **Fix**: Rewrote `asyncHandler` to properly use `Promise.resolve().catch(next)` which is optimized for Express 5's internal error handling.
+
+## forget await in 
+DB_user.save({validateBeforeSave}) : use await because DB is in another continent
