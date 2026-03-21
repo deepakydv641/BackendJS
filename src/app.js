@@ -2,6 +2,7 @@ import express from 'express'
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import router from './routes/user.routes.js';
+import router1 from './routes/videos.routes.js';
 
 const app = express();
 
@@ -17,6 +18,7 @@ app.use(cookieParser())
 
 console.log("Registering user routes at /api/v1/users");
 app.use("/api/v1/users", router)
+app.use("/api/v1/videos", router1)
 
 // Global error handler — catches errors thrown by asyncHandler
 app.use((err, req, res, next) => {

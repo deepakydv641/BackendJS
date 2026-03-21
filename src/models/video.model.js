@@ -19,8 +19,7 @@ const videoSchema = mongoose.Schema({
         required: true
     },
     duration: {
-        type: Number,
-        required: true
+        type: Number
     },
     views: {
         type: Number,
