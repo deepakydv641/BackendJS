@@ -4,10 +4,9 @@ import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Spinner from '../components/Spinner';
 import Navbar from '../components/Navbar';
-import Background from '../components/Background';
 
 const InputIcon = ({ children }) => (
-  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">{children}</span>
+  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-blue-500 transition-colors">{children}</span>
 );
 
 export default function ChangePasswordPage() {
@@ -42,29 +41,25 @@ export default function ChangePasswordPage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#080810] relative">
-      <Background />
+    <div className="min-h-screen bg-gray-50 dark:bg-[#09090b] relative">
       <Navbar />
       
       <div className="max-w-md mx-auto px-4 py-16 relative z-10 animate-slide-up">
         <div className="mb-8 text-center">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4"
-            style={{ background: 'linear-gradient(135deg, rgba(225,29,72,0.2), rgba(190,18,60,0.2))', boxShadow: '0 0 0 1px rgba(225,29,72,0.3)' }}>
-            <svg className="w-7 h-7 text-rose-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-rose-100 dark:bg-rose-500/10 text-rose-600 dark:text-rose-400 transition-transform hover:scale-105"
+            >
+            <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h1 className="text-3xl font-black text-white tracking-tight mb-2">Change Password</h1>
-          <p className="text-gray-400 text-sm">Choose a strong password to keep your account secure.</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight mb-2">Change Password</h1>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium">Choose a strong password to keep your account secure.</p>
         </div>
 
         <div className="card relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(225,29,72,0.6), transparent)' }} />
-
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Current Password</label>
+            <div className="group">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Current Password</label>
               <div className="relative">
                 <InputIcon>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -76,8 +71,8 @@ export default function ChangePasswordPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">New Password</label>
+            <div className="group">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">New Password</label>
               <div className="relative">
                 <InputIcon>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -89,8 +84,8 @@ export default function ChangePasswordPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Confirm New Password</label>
+            <div className="group">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Confirm New Password</label>
               <div className="relative">
                 <InputIcon>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -101,7 +96,7 @@ export default function ChangePasswordPage() {
                   placeholder="Min 6 characters" className="input-field pl-11 pr-11" required />
                 
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d={showPassword
@@ -117,8 +112,7 @@ export default function ChangePasswordPage() {
               <button type="button" onClick={() => navigate('/dashboard')} className="btn-ghost flex-1">
                 Cancel
               </button>
-              <button type="submit" disabled={loading} className="btn-primary flex-[2] flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(135deg, #e11d48, #be123c)', boxShadow: '0 8px 32px rgba(225,29,72,0.3)' }}>
+              <button type="submit" disabled={loading} className="btn-primary flex-[2] flex items-center justify-center gap-2">
                 {loading ? <><Spinner /><span>Saving…</span></> : 'Save Changes'}
               </button>
             </div>

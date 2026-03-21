@@ -3,10 +3,9 @@ import { Link, useNavigate } from 'react-router-dom';
 import api from '../api/axios';
 import toast from 'react-hot-toast';
 import Spinner from '../components/Spinner';
-import Background from '../components/Background';
 
 const InputIcon = ({ children }) => (
-  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">{children}</span>
+  <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-blue-500 transition-colors">{children}</span>
 );
 
 export default function RegisterPage() {
@@ -49,21 +48,19 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative">
-      <Background />
-
+    <div className="min-h-screen flex items-center justify-center py-10 px-4 relative bg-gray-50 dark:bg-[#09090b]">
       <div className="w-full max-w-lg relative z-10 animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 glow-violet"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}>
+          <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl mb-4 bg-blue-600 shadow-sm text-white transition-transform hover:scale-105"
+            >
             <svg className="w-7 h-7 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
             </svg>
           </div>
-          <h1 className="text-4xl font-black gradient-text mb-1 tracking-tight">UserHub</h1>
-          <p className="text-gray-500 text-sm">Create your free account today</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight mb-2">UserHub</h1>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium">Create your free account today</p>
         </div>
 
         <div className="card relative overflow-hidden">
@@ -72,35 +69,34 @@ export default function RegisterPage() {
 
           {/* ── Image Uploads ── */}
           <div className="mb-6">
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-3">Profile Images</p>
-            <div className="grid grid-cols-2 gap-3">
+            <p className="text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-3 ml-1">Profile Images</p>
+            <div className="grid grid-cols-2 gap-4">
               {/* Avatar */}
               <div>
                 <button type="button" id="avatar-btn"
                   onClick={() => document.getElementById('avatarInput').click()}
                   className={`w-full h-36 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2.5 transition-all duration-300 group ${
                     avatarPreview
-                      ? 'border-violet-500/60 bg-violet-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-violet-500/50 hover:bg-violet-500/5'
+                      ? 'border-blue-500 bg-blue-50 dark:bg-blue-500/10'
+                      : 'border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:border-blue-500'
                   }`}>
                   {avatarPreview ? (
                     <>
                       <img src={avatarPreview} alt="avatar"
-                        className="w-16 h-16 rounded-full object-cover ring-2 ring-violet-500 shadow-lg shadow-violet-900/50" />
-                      <span className="text-[11px] font-semibold text-violet-400">✓ Click to change</span>
+                        className="w-16 h-16 rounded-full object-cover ring-2 ring-blue-500 shadow-sm" />
+                      <span className="text-[11px] font-semibold text-blue-600 dark:text-blue-400">✓ Click to change</span>
                     </>
                   ) : (
                     <>
-                      <div className="w-11 h-11 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
-                        style={{ background: 'linear-gradient(135deg, rgba(124,58,237,0.3), rgba(79,70,229,0.3))' }}>
-                        <svg className="w-5 h-5 text-violet-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      <div className="w-11 h-11 rounded-full flex items-center justify-center transition-transform group-hover:scale-110 bg-blue-100 dark:bg-blue-500/20">
+                        <svg className="w-5 h-5 text-blue-600 dark:text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-gray-400 text-center">Profile Photo</p>
-                        <p className="text-[10px] text-red-400 text-center mt-0.5">required *</p>
+                        <p className="text-xs font-semibold text-gray-700 dark:text-zinc-300 text-center">Profile Photo</p>
+                        <p className="text-[10px] text-red-500 dark:text-red-400 text-center mt-0.5">required *</p>
                       </div>
                     </>
                   )}
@@ -115,27 +111,26 @@ export default function RegisterPage() {
                   onClick={() => document.getElementById('coverInput').click()}
                   className={`w-full h-36 rounded-2xl border-2 border-dashed flex flex-col items-center justify-center gap-2.5 transition-all duration-300 group overflow-hidden ${
                     coverPreview
-                      ? 'border-indigo-500/60 bg-indigo-500/10'
-                      : 'border-white/10 bg-white/[0.02] hover:border-indigo-500/50 hover:bg-indigo-500/5'
+                      ? 'border-indigo-500 bg-indigo-50 dark:bg-indigo-500/10'
+                      : 'border-gray-200 dark:border-zinc-700 bg-gray-50 dark:bg-zinc-800 hover:border-indigo-500'
                   }`}>
                   {coverPreview ? (
                     <>
                       <img src={coverPreview} alt="cover"
                         className="w-full h-24 object-cover rounded-xl" />
-                      <span className="text-[11px] font-semibold text-indigo-400">✓ Click to change</span>
+                      <span className="text-[11px] font-semibold text-indigo-600 dark:text-indigo-400">✓ Click to change</span>
                     </>
                   ) : (
                     <>
-                      <div className="w-11 h-11 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
-                        style={{ background: 'linear-gradient(135deg, rgba(79,70,229,0.3), rgba(37,99,235,0.3))' }}>
-                        <svg className="w-5 h-5 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5}
+                      <div className="w-11 h-11 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110 bg-indigo-100 dark:bg-indigo-500/20">
+                        <svg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                             d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                       </div>
                       <div>
-                        <p className="text-xs font-semibold text-gray-400 text-center">Cover Image</p>
-                        <p className="text-[10px] text-gray-600 text-center mt-0.5">optional</p>
+                        <p className="text-xs font-semibold text-gray-700 dark:text-zinc-300 text-center">Cover Image</p>
+                        <p className="text-[10px] text-gray-500 dark:text-zinc-400 text-center mt-0.5">optional</p>
                       </div>
                     </>
                   )}
@@ -146,13 +141,13 @@ export default function RegisterPage() {
             </div>
           </div>
 
-          <div className="border-t border-white/5 mb-6" />
+          <div className="border-t border-gray-100 dark:border-zinc-800/50 mb-6" />
 
           {/* ── Form ── */}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Full Name</label>
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Full Name</label>
                 <div className="relative">
                   <InputIcon>
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -164,8 +159,8 @@ export default function RegisterPage() {
                     placeholder="John Doe" className="input-field pl-11" required />
                 </div>
               </div>
-              <div>
-                <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Username</label>
+              <div className="group">
+                <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Username</label>
                 <div className="relative">
                   <InputIcon><span className="text-xs font-bold">@</span></InputIcon>
                   <input name="username" value={form.username} onChange={handleChange}
@@ -174,8 +169,8 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Email Address</label>
+            <div className="group">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Email Address</label>
               <div className="relative">
                 <InputIcon>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -188,8 +183,8 @@ export default function RegisterPage() {
               </div>
             </div>
 
-            <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Password</label>
+            <div className="group">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Password</label>
               <div className="relative">
                 <InputIcon>
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -200,7 +195,7 @@ export default function RegisterPage() {
                 <input type={showPassword ? 'text' : 'password'} name="password" value={form.password}
                   onChange={handleChange} placeholder="Min 6 characters" className="input-field pl-11 pr-11" required />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d={showPassword
@@ -213,7 +208,7 @@ export default function RegisterPage() {
             </div>
 
             <button type="submit" disabled={loading}
-              className="btn-primary w-full flex items-center justify-center gap-2 mt-2">
+              className="btn-primary mt-2 w-full flex items-center justify-center gap-2">
               <span className="relative z-10 flex items-center gap-2">
                 {loading ? <><Spinner /><span>Creating account…</span></> : (
                   <><span>Create Account</span>
@@ -226,10 +221,10 @@ export default function RegisterPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/5 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-zinc-800/50 text-center">
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
               Already have an account?{' '}
-              <Link to="/login" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+              <Link to="/login" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors">
                 Sign in →
               </Link>
             </p>

@@ -60,3 +60,38 @@ This document summarizes the bugs, errors, and architectural issues identified a
 
 ## forget await in 
 DB_user.save({validateBeforeSave}) : use await because DB is in another continent
+
+
+Error Log & Troubleshooting Guide
+This file documents the key bugs, API errors, and architectural issues encountered while developing the UserHub Full-stack application. Use this as a reference guide for debugging similar full-stack (React + Express) issues.
+
+1. Cannot POST /api/v1/videos/uploadVideo (404 Not Found)
+Context: Trying to test video uploads via Postman. Root Cause: The backend Express route was registered as /upload-video (Kebab-case), but the API client was sending the request to /uploadVideo (Camel-case). Solution: Added an alias route to 
+videos.routes.js
+ using .route('/uploadVideo') to map to the same uploadVideo controller, preventing 404s for clients expecting CamelCase conventions.
+
+2. {"success": false, "message": "All fieds are Required!"} (400 Bad Request)
+Context: Trying to upload a video via Postman. Root Cause: The uploadVideo controller strictly expects title, description, and duration from req.body. If the client submits a request missing any of these keys, an explicit 400 Bad Request API Error is thrown. Solution: Verified testing environments to strictly include the Form Data payload containing all required values. Modified frontend forms to assert strict HTML5 required flags.
+
+3. Cannot POST /api/v1/videos/all-videos (404 Not Found)
+Context: Trying to fetch videos via Postman to display on the HomePage. Root Cause: Method mismatch. The client was making a POST request to an endpoint that was explicitly registered as a GET request (router1.route("/all-videos").get(...)). Solution: Switched the HTTP Method in Postman to GET and properly called the URL.
+
+4. Mongoose Pre-Save Hook Crash (next is not a function)
+Context: During User Registration involving password hashing and avatar uploads. Root Cause: An explicit operational failure inside the asyncHandler logic combined with improper arguments passed inside the Mongoose schema's userSchema.pre('save', ...) callback. The next function broke the middleware chain. Solution: Refactored the callback signature to cleanly execute next(). Modified the global Express error-handling middleware (app.use((err, req, ...))) to gracefully return localized JSON error formats instead of crashing the process.
+
+5. Frontend Stuck on "Uploading..." Forever
+Context: In the React frontend, when clicking the "Upload Video" button, the spinner hung indefinitely, but no errors showed up in the DevTools console. Root Cause: When making the videosApi.post('/upload-video', data) call using axios, the codebase manually declared { headers: { 'Content-Type': 'multipart/form-data' } }. This action overrides the browser's dynamically generated Content-Type, stripping away the crucial boundary hash parameters needed by multer to chunk the streams. The Node backend hung instantly because the stream could not be parsed. Solution: Removed the explicit Content-Type headers from the Axios POST request. Axios automatically processes FormData objects and appends the precise headers natively.
+
+6. Missing Options for "Photo Upload" in Video Input
+Context: While uploading a video, the user wanted to also test uploading image types (like JPEGs or PNGs) inside the same input field, but the file dialog hid them. Root Cause: The HTML Input was strictly restricted using accept="video/*". Solution: Modified the 
+UploadVideoPage.jsx
+ component input attribute to accept="video/*,image/*".
+
+7. "User" displays on Video Cards instead of the Author's Full Name
+Context: On the frontend Dashboard, the video.owner?.fullName string was evaluating to undefined, printing fallback text instead. Root Cause: The Backend GET /all-videos route executed a standard Model Query (await Video.find()). Because MongoDB natively only stores the raw ObjectId linking to the Uploader, the frontend received a string instead of a User JSON object. Solution: Updated the backend API controller (
+video.controller.js
+) to apply a Left Join Equivalent operation using Mongoose: await Video.find().populate("owner", "fullName username avatar createdAt");. The frontend then received the complete embedded Author object inside every video JSON.
+
+8. HTML5 Video Fullscreen Controls Unclickable / Blocked
+Context: The inline video player on VideoCards played normally, but the browser greyed-out or ignored the Fullscreen button. Root Cause: Two overlapping issues: 1) The native video click event was bubbling up to the wrapper card, causing focus drops. 2) The backend previously stored `http://...` Cloudinary URLs. Modern browsers strictly disable the Fullscreen API for any `<video>` element loading mixed-content (HTTP resources on secure pipelines). Solution: Upgraded `video.controller.js` to store `cloudinaryVideo.secure_url`. Added `replace('http://', 'https://')` to `VideoCard.jsx` to dynamically upgrade legacy HTTP URLs in the database on rendering. Added `onClick={(e) => e.stopPropagation()}` to isolate the player controls.
+

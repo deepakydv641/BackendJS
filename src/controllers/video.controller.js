@@ -50,9 +50,9 @@ const uploadVideo = asyncHandler(async (req, res) => {
         title,
         description,
         duration,
-        videoFile: cloudinaryVideo.url,
-        thumbnail: cloudinaryThumbnail.url,
-        owner: owner._id
+        videoFile: cloudinaryVideo.secure_url || cloudinaryVideo.url,
+        thumbnail: cloudinaryThumbnail.secure_url || cloudinaryThumbnail.url,
+        owner
     })
 
     if (!createdVideo) {
@@ -66,7 +66,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
 })
 
 const getAllVideos = asyncHandler(async (req, res) => {
-    const videoList = await Video.find()
+    const videoList = await Video.find().populate("owner", "fullName username avatar createdAt");
     return res.status(200)
         .json(
             new ApiResponse(200, videoList, "Videos fetched successfully")

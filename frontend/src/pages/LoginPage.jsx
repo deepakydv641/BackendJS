@@ -3,7 +3,6 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 import Spinner from '../components/Spinner';
-import Background from '../components/Background';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -33,42 +32,33 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 relative">
-      <Background />
-
+    <div className="min-h-screen flex items-center justify-center p-4 relative bg-gray-50 dark:bg-[#09090b]">
       <div className="w-full max-w-md relative z-10 animate-slide-up">
         {/* Logo */}
         <div className="text-center mb-10">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 glow-violet"
-            style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)' }}>
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-5 bg-blue-600 shadow-sm text-white transition-transform hover:scale-105"
+            >
             <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                 d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
           </div>
-          <h1 className="text-4xl font-black gradient-text mb-2 glow-text tracking-tight">UserHub</h1>
-          <p className="text-gray-500 text-sm">Sign in to continue your journey</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-zinc-100 tracking-tight mb-2">UserHub</h1>
+          <p className="text-gray-500 dark:text-zinc-400 text-sm font-medium">Sign in to continue your journey</p>
         </div>
 
         <div className="card relative overflow-hidden">
-          {/* Card shimmer line at top */}
-          <div className="absolute top-0 left-0 right-0 h-px"
-            style={{ background: 'linear-gradient(90deg, transparent, rgba(139,92,246,0.6), transparent)' }} />
-
           {/* Toggle */}
-          <div className="flex bg-black/30 rounded-2xl p-1 mb-6 border border-white/5">
+          <div className="flex bg-gray-100 dark:bg-zinc-800 rounded-lg p-1 mb-6 border border-gray-200 dark:border-zinc-700/50">
             {['Email', 'Username'].map((label, i) => (
               <button key={label} type="button"
                 onClick={() => setUseEmail(i === 0)}
-                className={`flex-1 py-2.5 rounded-xl text-sm font-semibold transition-all duration-300 ${
+                className={`flex-1 py-2 rounded-md text-sm font-semibold transition-all duration-300 ${
                   (i === 0) === useEmail
-                    ? 'text-white shadow-lg'
-                    : 'text-gray-500 hover:text-gray-300'
+                    ? 'bg-white dark:bg-zinc-700 text-gray-900 dark:text-white shadow-sm'
+                    : 'text-gray-500 hover:text-gray-700 dark:text-zinc-400 dark:hover:text-zinc-300'
                 }`}
-                style={(i === 0) === useEmail ? {
-                  background: 'linear-gradient(135deg, rgba(124,58,237,0.8), rgba(79,70,229,0.8))',
-                  boxShadow: '0 4px 15px rgba(109,40,217,0.4)'
-                } : {}}>
+                style={{}}>
                 {label}
               </button>
             ))}
@@ -77,11 +67,11 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {/* Email or Username field */}
             <div className="group">
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">
                 {useEmail ? 'Email Address' : 'Username'}
               </label>
               <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-blue-500 transition-colors">
                   {useEmail ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -108,9 +98,9 @@ export default function LoginPage() {
 
             {/* Password */}
             <div>
-              <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-2">Password</label>
-              <div className="relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-600">
+              <label className="block text-xs font-bold text-gray-500 dark:text-zinc-500 uppercase tracking-widest mb-2 ml-1">Password</label>
+              <div className="relative group">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 dark:text-zinc-500 group-focus-within:text-blue-500 transition-colors">
                   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
                       d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
@@ -126,7 +116,7 @@ export default function LoginPage() {
                   required
                 />
                 <button type="button" onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-300 transition-colors">
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:text-zinc-500 dark:hover:text-zinc-300 transition-colors">
                   {showPassword ? (
                     <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2}
@@ -160,17 +150,17 @@ export default function LoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 pt-6 border-t border-white/5 text-center">
-            <p className="text-sm text-gray-600">
+          <div className="mt-6 pt-6 border-t border-gray-100 dark:border-zinc-800/50 text-center">
+            <p className="text-sm text-gray-500 dark:text-zinc-400">
               Don't have an account?{' '}
-              <Link to="/register" className="text-violet-400 hover:text-violet-300 font-semibold transition-colors">
+              <Link to="/register" className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-semibold transition-colors">
                 Create one →
               </Link>
             </p>
           </div>
         </div>
 
-        <p className="text-center text-xs text-gray-700 mt-6">
+        <p className="text-center text-xs text-gray-500 dark:text-zinc-500 mt-6 font-medium">
           Secured with end-to-end encryption 🔒
         </p>
       </div>
