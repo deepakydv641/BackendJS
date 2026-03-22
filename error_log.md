@@ -95,3 +95,25 @@ video.controller.js
 8. HTML5 Video Fullscreen Controls Unclickable / Blocked
 Context: The inline video player on VideoCards played normally, but the browser greyed-out or ignored the Fullscreen button. Root Cause: Two overlapping issues: 1) The native video click event was bubbling up to the wrapper card, causing focus drops. 2) The backend previously stored `http://...` Cloudinary URLs. Modern browsers strictly disable the Fullscreen API for any `<video>` element loading mixed-content (HTTP resources on secure pipelines). Solution: Upgraded `video.controller.js` to store `cloudinaryVideo.secure_url`. Added `replace('http://', 'https://')` to `VideoCard.jsx` to dynamically upgrade legacy HTTP URLs in the database on rendering. Added `onClick={(e) => e.stopPropagation()}` to isolate the player controls.
 
+
+
+---
+
+## Video Playback Bugs - 2026-03-22
+
+### 9. Videos Not Playable - Cloudinary Delivers HLS Instead of MP4
+- **Context**: Videos uploaded successfully but show a black screen in the video player.
+- **Root Cause**: Cloudinary serves HLS (.m3u8 manifest) URLs by default. The HTML5 video tag cannot decode HLS without hls.js.
+- **File Affected**: src/controllers/video.controller.js
+- **Fix**: Inject f_mp4,vc_auto into the Cloudinary URL path before saving to MongoDB.
+- **Note**: Only applies to newly uploaded videos. Existing videos need re-upload.
+
+### 10. Wrong accept Attribute Allows Images as Video Files
+- **Context**: Previous workaround (Error #6) changed accept to video/*,image/*. Users could pick a .jpg as the video file. MongoDB stores an image URL in the videoFile field. The video tag fails silently.
+- **File Affected**: frontend/src/pages/UploadVideoPage.jsx
+- **Fix**: Reverted accept to video/* only.
+
+### 11. duration Stored as String Instead of Number
+- **Context**: FormData serializes values as strings. Video schema expects type:Number. Mongoose stored "120" instead of 120, breaking sorting and formatDuration().
+- **File Affected**: src/controllers/video.controller.js
+- **Fix**: Cast before saving: duration: Number(duration)

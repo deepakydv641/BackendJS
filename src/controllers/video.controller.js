@@ -46,11 +46,20 @@ const uploadVideo = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to upload video or thumbnail on cloudinary")
     }
 
+    // Convert Cloudinary URL to force MP4 delivery (browser-compatible)
+    // Cloudinary may return an HLS stream URL by default, which native <video> can't play.
+    // By injecting f_mp4,vc_auto into the URL path, we force a direct MP4 delivery URL.
+    const makePlayableUrl = (url) => {
+        if (!url) return url;
+        // Insert Cloudinary transformation before the version/filename segment
+        return url.replace('/upload/', '/upload/f_mp4,vc_auto/');
+    };
+
     const createdVideo = await Video.create({
         title,
         description,
-        duration,
-        videoFile: cloudinaryVideo.secure_url || cloudinaryVideo.url,
+        duration: Number(duration),
+        videoFile: makePlayableUrl(cloudinaryVideo.secure_url || cloudinaryVideo.url),
         thumbnail: cloudinaryThumbnail.secure_url || cloudinaryThumbnail.url,
         owner
     })
@@ -73,7 +82,98 @@ const getAllVideos = asyncHandler(async (req, res) => {
         )
 })
 
+const updateVideoDetails = asyncHandler(async (req, res) => {
+
+    // NOT allow changing the video file itself
+    // If you want a new video → you must re-upload
+
+    // you can update these things Title Description Thumbnail
+
+    // Steps:
+    // 1. Click on the video you want to edit
+    // 2. you can now edit the deatils
+    // 3. click update
+    // 4. click save
+
+    // we should have that video to update the deatils
+    // u have clicked on video means u have the url ,and can get the ID of video from req.params
+
+    const { videoId } = req.params
+
+    if (!videoId) {
+        throw new ApiError(400, "Video is Required")
+    }
+
+    const { title, description } = req.body
+
+    const { thumbnailPath } = req.file?.path
+
+    if (!title && description && !thumbnailPath) {
+        throw new ApiError(400, "All fields are required")
+    }
+
+    // abb sare variable mil gye hai , bss update krna baaki hai
+
+    const video = Video.findById(videoId)
+
+    if (!video) {
+        throw new ApiError(400, "Video not FOUND")
+    }
+
+    video.title = title
+    video.description = description
+
+    // now i have update the title and description of the video
+
+    if (thumbnailPath) {
+        const cloudinaryThumbnail = await uploadOnCloudinary(thumbnailPath)
+        if (!cloudinaryThumbnail) {
+            throw new ApiError(500, "Failed to upload thumbnail on cloudinary")
+        }
+        video.thumbnail = cloudinaryThumbnail.secure_url || cloudinaryThumbnail.url
+    }
+
+    await video.save({ validateBeforesave: false })
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                video,
+                "Video updated successfully"
+            )
+        )
+
+})
+
+const getYourVideos = asyncHandler(async (req, res) => {
+    const UserId = req.user._id
+
+    const videoList = await Video.aggregate([
+        {
+            $match: {
+                owner: UserId
+            }
+        }
+    ])
+
+    if (!videoList) {
+        throw new ApiError(400, "No video found")
+    }
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                videoList,
+                "Videos fetched successfully"
+            )
+        )
+})
+
 export {
     uploadVideo,
-    getAllVideos
+    getAllVideos,
+    updateVideoDetails,
+    getYourVideos
 }
