@@ -1,8 +1,52 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
+import { useAuth } from '../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import videosApi from '../api/videosApi';
 
-export default function VideoCard({ video }) {
+export default function VideoCard({ video, onDelete, showActions = false }) {
+  const { user } = useAuth();
+  const navigate = useNavigate();
   const [isPlaying, setIsPlaying] = useState(false);
   const [hovered, setHovered] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const menuRef = useRef(null);
+
+  // Close menu on click outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const isOwner = showActions && user?._id && (user._id === video.owner?._id || user._id === video.owner);
+
+  const handleDelete = async (e) => {
+    e.stopPropagation();
+    if (!window.confirm("Are you sure you want to delete this video?")) {
+        setShowMenu(false);
+        return;
+    }
+    
+    setIsDeleting(true);
+    try {
+        await videosApi.delete(`/delete-video/${video._id}`);
+        setShowMenu(false);
+        if (onDelete) {
+            onDelete(video._id);
+        } else {
+            window.location.reload();
+        }
+    } catch (error) {
+        console.error("Failed to delete video", error);
+        alert(error.response?.data?.message || "Error deleting video");
+        setIsDeleting(false);
+    }
+  };
 
   const formatDuration = (seconds) => {
     if (!seconds) return null;
@@ -120,7 +164,7 @@ export default function VideoCard({ video }) {
       </div>
 
       {/* Meta */}
-      <div className="flex gap-3 px-1">
+      <div className="flex gap-3 px-1 relative">
         {/* Avatar */}
         <div className="w-9 h-9 rounded-xl shrink-0 overflow-hidden" style={{ border: '2px solid rgba(124,58,237,0.3)' }}>
           {video.owner?.avatar ? (
@@ -132,9 +176,9 @@ export default function VideoCard({ video }) {
           )}
         </div>
 
-        <div className="flex flex-col min-w-0 gap-0.5">
+        <div className="flex flex-col min-w-0 gap-0.5 flex-1 cursor-default" onClick={(e) => e.stopPropagation()}>
           <h3
-            className="text-sm font-semibold leading-tight line-clamp-2 transition-colors duration-200"
+            className="text-sm font-semibold leading-tight line-clamp-2 transition-colors duration-200 cursor-pointer"
             style={{ color: hovered ? '#a78bfa' : 'var(--text-primary)' }}
           >
             {video.title}
@@ -146,6 +190,51 @@ export default function VideoCard({ video }) {
             {timeAgo(video.createdAt)}
           </p>
         </div>
+
+        {/* 3 Dots Menu */}
+        {isOwner && (
+          <div className="relative shrink-0" ref={menuRef}>
+            <button 
+              onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
+              className="p-1.5 rounded-full hover:bg-white/10 transition-colors text-white/70 hover:text-white mt-0.5"
+            >
+              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                 <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
+              </svg>
+            </button>
+            
+            {showMenu && (
+              <div className="absolute right-0 top-10 w-36 rounded-xl shadow-xl overflow-hidden z-20 border animate-fade-in"
+                   style={{ background: 'var(--surface-2)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                <button
+                  onClick={(e) => { e.stopPropagation(); setShowMenu(false); navigate(`/edit-video/${video._id}`, { state: { video } }); }}
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2"
+                  style={{ color: 'var(--text-primary)' }}
+                >
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                  </svg>
+                  Edit
+                </button>
+                <div className="w-full h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                <button
+                  onClick={handleDelete}
+                  disabled={isDeleting}
+                  className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
+                >
+                  {isDeleting ? (
+                    <span className="w-4 h-4 rounded-full border-2 border-red-400 border-t-transparent animate-spin inline-block"></span>
+                  ) : (
+                    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  )}
+                  {isDeleting ? 'Deleting...' : 'Delete'}
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

@@ -259,7 +259,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 place-content-start">
                   {videosWithOwner.map(video => (
-                    <VideoCard key={video._id} video={video} />
+                    <VideoCard key={video._id} video={video} showActions={true} onDelete={(id) => setVideos(prev => prev.filter(v => v._id !== id))} />
                   ))}
                 </div>
               )}

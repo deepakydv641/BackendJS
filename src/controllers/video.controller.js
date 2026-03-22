@@ -106,24 +106,25 @@ const updateVideoDetails = asyncHandler(async (req, res) => {
 
     const { title, description } = req.body
 
-    const { thumbnailPath } = req.file?.path
+    const thumbnailPath = req.file?.path
 
-    if (!title && description && !thumbnailPath) {
-        throw new ApiError(400, "All fields are required")
+    if (!title && !description && !thumbnailPath) {
+        throw new ApiError(400, "At least one field is required to update")
     }
 
-    // abb sare variable mil gye hai , bss update krna baaki hai
-
-    const video = Video.findById(videoId)
+    const video = await Video.findById(videoId)
 
     if (!video) {
         throw new ApiError(400, "Video not FOUND")
     }
+    
+    // Check if user is the owner
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to edit this video")
+    }
 
-    video.title = title
-    video.description = description
-
-    // now i have update the title and description of the video
+    if (title !== undefined) video.title = title;
+    if (description !== undefined) video.description = description;
 
     if (thumbnailPath) {
         const cloudinaryThumbnail = await uploadOnCloudinary(thumbnailPath)
@@ -171,9 +172,44 @@ const getYourVideos = asyncHandler(async (req, res) => {
         )
 })
 
+const deleteVideo = asyncHandler(async (req, res) => {
+    const { videoId } = req.params // FIX 1: Destructure videoId from req.params
+
+    if (!videoId) {
+        throw new ApiError(400, "VideoId is required")
+    }
+
+    const video = await Video.findById(videoId)
+
+    if (!video) {
+        throw new ApiError(400, "Video not found")
+    }
+
+    // FIX 2: Security check - ensure only the owner can delete the video
+    if (video.owner.toString() !== req.user._id.toString()) {
+        throw new ApiError(403, "You are not authorized to delete this video")
+    }
+
+    // FIX 3: Correctly delete the document using findByIdAndDelete
+    await Video.findByIdAndDelete(videoId)
+
+    // TODO: Ideally, you should also delete the video and thumbnail from Cloudinary here
+    // using video.videoFile and video.thumbnail URLs to save storage space.
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Video deleted successfully"
+            )
+        )
+})
+
 export {
     uploadVideo,
     getAllVideos,
     updateVideoDetails,
-    getYourVideos
+    getYourVideos,
+    deleteVideo
 }

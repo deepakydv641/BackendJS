@@ -7,6 +7,7 @@ import DashboardPage from './pages/DashboardPage';
 import ChangePasswordPage from './pages/ChangePasswordPage';
 import UpdateAccountPage from './pages/UpdateAccountPage';
 import UploadVideoPage from './pages/UploadVideoPage';
+import EditVideoPage from './pages/EditVideoPage';
 import Spinner from './components/Spinner';
 
 function PrivateRoute({ children }) {
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/change-password" element={<PrivateRoute><ChangePasswordPage /></PrivateRoute>} />
       <Route path="/update-account" element={<PrivateRoute><UpdateAccountPage /></PrivateRoute>} />
       <Route path="/upload-video" element={<PrivateRoute><UploadVideoPage /></PrivateRoute>} />
+      <Route path="/edit-video/:videoId" element={<PrivateRoute><EditVideoPage /></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );
