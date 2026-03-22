@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import videosApi from '../api/videosApi';
+import { getSubscribers, getSubscribed } from '../api/subscriptionsApi';
 import VideoCard from '../components/VideoCard';
 import Spinner from '../components/Spinner';
 
@@ -82,23 +83,32 @@ const quickActions = [
 export default function DashboardPage() {
   const { user } = useAuth();
   const [videos, setVideos] = useState([]);
+  const [subscribers, setSubscribers] = useState([]);
+  const [subscribedTo, setSubscribedTo] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [activeTab, setActiveTab] = useState('videos'); // 'videos' | 'subscribers' | 'subscribed'
 
   useEffect(() => {
-    const fetchVideos = async () => {
+    const fetchData = async () => {
       try {
-        const response = await videosApi.get('/your-videos');
-        setVideos(response.data.data || []);
+        const [vRes, sRes, stRes] = await Promise.all([
+          videosApi.get('/your-videos'),
+          getSubscribers(user?._id),
+          getSubscribed(user?._id)
+        ]);
+        setVideos(vRes.data.data || []);
+        setSubscribers(sRes.data.data || []);
+        setSubscribedTo(stRes.data.data || []);
       } catch (err) {
-        console.error("Failed to fetch videos", err);
-        setError("Failed to load your videos.");
+        console.error("Failed to fetch dashboard data", err);
+        setError("Failed to load your profile data.");
       } finally {
         setLoading(false);
       }
     };
-    fetchVideos();
-  }, []);
+    if (user?._id) fetchData();
+  }, [user?._id]);
 
   // inject the current user as the "owner" so the VideoCard can display the avatar and name
   const videosWithOwner = videos.map(v => ({ ...v, owner: user }));
@@ -183,8 +193,8 @@ export default function DashboardPage() {
             <div className="grid grid-cols-2 gap-3">
               <StatCard label="Videos" value={loading ? '...' : videos.length} color="#7c3aed" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>} />
               <StatCard label="Views" value="—" color="#0891b2" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>} />
-              <StatCard label="Subscribers" value="—" color="#059669" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>} />
-              <StatCard label="Likes" value="—" color="#d97706" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>} />
+              <StatCard label="Subscribers" value={loading ? '...' : subscribers.length} color="#059669" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" /></svg>} />
+              <StatCard label="Following" value={loading ? '...' : subscribedTo.length} color="#d97706" icon={<svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>} />
             </div>
 
             {/* Quick Actions */}
@@ -204,23 +214,30 @@ export default function DashboardPage() {
 
           </div>
 
-          {/* RIGHT COLUMN: My Videos */}
+          {/* RIGHT COLUMN: Content Tabs */}
           <div className="w-full lg:w-[55%] flex flex-col">
-            <div className="flex items-center justify-between mb-6">
-              <h2 className="text-xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-                My Uploaded Videos
-              </h2>
-              <Link
-                to="/upload-video"
-                className="btn-primary text-sm py-2 px-4 rounded-xl font-medium"
-                style={{ 
-                  background: 'linear-gradient(135deg, #7c3aed, #4f46e5)',
-                  color: 'white',
-                  textDecoration: 'none'
-                }}
+            <div className="flex items-center gap-6 mb-6 border-b border-white/5 overflow-x-auto whitespace-nowrap scrollbar-none">
+              <button 
+                onClick={() => setActiveTab('videos')}
+                className={`pb-3 text-sm font-bold transition-all px-1 relative ${activeTab === 'videos' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
               >
-                Upload New
-              </Link>
+                Videos
+                {activeTab === 'videos' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500 rounded-full" />}
+              </button>
+              <button 
+                onClick={() => setActiveTab('subscribers')}
+                className={`pb-3 text-sm font-bold transition-all px-1 relative ${activeTab === 'subscribers' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                Subscribers ({subscribers.length})
+                {activeTab === 'subscribers' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500 rounded-full" />}
+              </button>
+              <button 
+                onClick={() => setActiveTab('subscribed')}
+                className={`pb-3 text-sm font-bold transition-all px-1 relative ${activeTab === 'subscribed' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                Subscribed ({subscribedTo.length})
+                {activeTab === 'subscribed' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500 rounded-full" />}
+              </button>
             </div>
 
             <div
@@ -234,33 +251,68 @@ export default function DashboardPage() {
               {loading ? (
                 <div className="flex flex-col items-center justify-center h-full text-center">
                   <Spinner />
-                  <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>Loading your videos...</p>
+                  <p className="mt-4 text-sm" style={{ color: 'var(--text-muted)' }}>Loading...</p>
                 </div>
-              ) : error ? (
-                <div className="flex flex-col items-center justify-center h-full text-center">
-                  <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 mb-4">
-                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-                  </div>
-                  <p className="text-red-400 font-medium">{error}</p>
-                </div>
-              ) : videos.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-full text-center py-10">
-                  <div className="w-20 h-20 rounded-full mb-5 flex items-center justify-center" style={{ background: 'var(--surface-3)', color: 'var(--text-muted)' }}>
-                    <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
-                  </div>
-                  <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>No videos yet</h3>
-                  <p className="text-sm px-8 mb-6" style={{ color: 'var(--text-muted)' }}>
-                    You haven't uploaded any videos to your channel. Start sharing your content with the world!
-                  </p>
-                  <Link to="/upload-video" className="btn-primary py-2 px-6 rounded-xl font-medium" style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white', textDecoration: 'none' }}>
-                    Upload Your First Video
-                  </Link>
+              ) : activeTab === 'videos' ? (
+                 <>
+                  {videos.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-full text-center py-10">
+                      <div className="w-20 h-20 rounded-full mb-5 flex items-center justify-center" style={{ background: 'var(--surface-3)', color: 'var(--text-muted)' }}>
+                        <svg className="w-10 h-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" /></svg>
+                      </div>
+                      <h3 className="text-lg font-bold mb-2" style={{ color: 'var(--text-primary)' }}>No videos yet</h3>
+                      <p className="text-sm px-8 mb-6" style={{ color: 'var(--text-muted)' }}>You haven't uploaded any videos yet.</p>
+                      <Link to="/upload-video" className="btn-primary py-2 px-6 rounded-xl font-medium">Upload Now</Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 place-content-start">
+                      {videosWithOwner.map(video => (
+                        <VideoCard key={video._id} video={video} showActions={true} onDelete={(id) => setVideos(prev => prev.filter(v => v._id !== id))} />
+                      ))}
+                    </div>
+                  )}
+                 </>
+              ) : activeTab === 'subscribers' ? (
+                <div className="flex flex-col gap-4">
+                  {subscribers.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-center">
+                      <p className="text-sm text-gray-500">No subscribers yet.</p>
+                    </div>
+                  ) : (
+                    subscribers.map(sub => (
+                      <div key={sub._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <img src={sub.subscriberDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold truncate text-white">{sub.subscriberDetail?.[0]?.fullName}</p>
+                          <p className="text-xs text-violet-400 truncate">@{sub.subscriberDetail?.[0]?.username}</p>
+                        </div>
+                        <Link to={`/channel/${sub.subscriberDetail?.[0]?.username}`} className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all">
+                          View
+                        </Link>
+                      </div>
+                    ))
+                  )}
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 place-content-start">
-                  {videosWithOwner.map(video => (
-                    <VideoCard key={video._id} video={video} showActions={true} onDelete={(id) => setVideos(prev => prev.filter(v => v._id !== id))} />
-                  ))}
+                <div className="flex flex-col gap-4">
+                  {subscribedTo.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-center">
+                      <p className="text-sm text-gray-500">You haven't subscribed to anyone yet.</p>
+                    </div>
+                  ) : (
+                    subscribedTo.map(sub => (
+                      <div key={sub._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
+                        <img src={sub.subscribedDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" />
+                        <div className="flex-1 min-w-0">
+                          <p className="text-sm font-bold truncate text-white">{sub.subscribedDetail?.[0]?.fullName}</p>
+                          <p className="text-xs text-sky-400 truncate">@{sub.subscribedDetail?.[0]?.username}</p>
+                        </div>
+                        <Link to={`/channel/${sub.subscribedDetail?.[0]?.username}`} className="text-[10px] font-bold px-3 py-1.5 rounded-lg bg-white/10 text-white hover:bg-white/20 transition-all">
+                          View
+                        </Link>
+                      </div>
+                    ))
+                  )}
                 </div>
               )}
             </div>

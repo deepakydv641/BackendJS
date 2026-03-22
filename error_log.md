@@ -117,3 +117,31 @@ Context: The inline video player on VideoCards played normally, but the browser 
 - **Context**: FormData serializes values as strings. Video schema expects type:Number. Mongoose stored "120" instead of 120, breaking sorting and formatDuration().
 - **File Affected**: src/controllers/video.controller.js
 - **Fix**: Cast before saving: duration: Number(duration)
+
+---
+
+## Edit Video & Subscriptions Bugs - 2026-03-22
+
+### 12. App Crash on Missing Thumbnail in Video Update
+- **Context**: Updating video details without providing a new thumbnail file crashed the app.
+- **Root Cause**: `const { path } = req.file` throws `TypeError: Cannot destructure property 'path' of 'undefined'`.
+- **File Affected**: `src/controllers/video.controller.js` (`updateVideoDetails`)
+- **Fix**: Used optional chaining without destructuring: `const thumbnailPath = req.file?.path`.
+
+### 13. Unauthorized Deletion & Modification of Videos
+- **Context**: Any authenticated user could send a PATCH or DELETE request with a valid video ID to modify/delete another user's video.
+- **Root Cause**: The controller logic was fetching the video but failed to verify if the requester was the owner.
+- **File Affected**: `src/controllers/video.controller.js` (`updateVideoDetails`, `deleteVideo`)
+- **Fix**: Added explicit ownership checks: `if (video.owner.toString() !== req.user._id.toString()) throw new ApiError(403, "Not authorized")`.
+
+### 14. Subscription Aggregation Returns Empty Results
+- **Context**: Fetching subscribers or subscribed channels yielded an empty array, even when documents existed in the DB.
+- **Root Cause**: The initial `$match` stage in the aggregation pipeline was comparing an `ObjectId` type (in DB) to a plain `String` (from `req.params`).
+- **File Affected**: `src/controllers/subscription.controller.js`
+- **Fix**: Explicitly cast the parameter: `$match: { channel: new mongoose.Types.ObjectId(userId) }`.
+
+### 15. Frontend Dashboard Fails to Load ANY Data (Promise.all Bug)
+- **Context**: The `DashboardPage` showed a generic error, and no videos or stats loaded.
+- **Root Cause**: The frontend called `videosApi.get()`, `getSubscribers()`, and `getSubscribed()` concurrently using `Promise.all`. The backend `subscription.controller.js` was designed to throw a `400 ApiError` if the subscription lists were empty (length === 0). This single rejection caused the entire `Promise.all` chain to fail.
+- **File Affected**: `src/controllers/subscription.controller.js`
+- **Fix**: Removed the `ApiError` for empty results. Modern REST APIs should gracefully return `200 OK` with `data: []` for empty sets instead of throwing client errors.

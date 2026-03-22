@@ -2,6 +2,8 @@ import { useState, useRef, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import videosApi from '../api/videosApi';
+import { toggleSubscription, getSubscribed } from '../api/subscriptionsApi';
+import toast from 'react-hot-toast';
 
 export default function VideoCard({ video, onDelete, showActions = false }) {
   const { user } = useAuth();
@@ -10,7 +12,21 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
   const [hovered, setHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [isSubscribed, setIsSubscribed] = useState(false);
+  const [subLoading, setSubLoading] = useState(false);
+  const [nameHovered, setNameHovered] = useState(false);
   const menuRef = useRef(null);
+
+  // Check initial subscription status
+  useEffect(() => {
+    if (user?._id && video.owner?._id && user._id !== video.owner._id) {
+       getSubscribed(user._id).then(res => {
+         const list = res.data.data || [];
+         const subbed = list.some(s => s.subscribedDetail?.[0]?._id === video.owner._id || s.channel === video.owner._id);
+         setIsSubscribed(subbed);
+       }).catch(() => {});
+    }
+  }, [user, video.owner]);
 
   // Close menu on click outside
   useEffect(() => {
@@ -45,6 +61,21 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
         console.error("Failed to delete video", error);
         alert(error.response?.data?.message || "Error deleting video");
         setIsDeleting(false);
+    }
+  };
+
+  const handleToggleSub = async (e) => {
+    e.stopPropagation();
+    if (!user) return navigate('/login');
+    setSubLoading(true);
+    try {
+      await toggleSubscription(video.owner?._id || video.owner);
+      setIsSubscribed(!isSubscribed);
+      toast.success(isSubscribed ? 'Unsubscribed' : 'Subscribed');
+    } catch (err) {
+      toast.error('Action failed');
+    } finally {
+      setSubLoading(false);
     }
   };
 
@@ -176,16 +207,41 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
           )}
         </div>
 
-        <div className="flex flex-col min-w-0 gap-0.5 flex-1 cursor-default" onClick={(e) => e.stopPropagation()}>
+        <div 
+          className="flex flex-col min-w-0 gap-0.5 flex-1 cursor-default relative" 
+          onClick={(e) => e.stopPropagation()}
+          onMouseEnter={() => setNameHovered(true)}
+          onMouseLeave={() => setNameHovered(false)}
+        >
           <h3
             className="text-sm font-semibold leading-tight line-clamp-2 transition-colors duration-200 cursor-pointer"
             style={{ color: hovered ? '#a78bfa' : 'var(--text-primary)' }}
           >
             {video.title}
           </h3>
-          <p className="text-xs font-medium truncate mt-0.5" style={{ color: 'var(--text-muted)' }}>
-            {video.owner?.fullName || 'Unknown Creator'}
-          </p>
+          <div className="flex items-center gap-2 mt-0.5 min-h-[1.25rem]">
+            <p className="text-xs font-medium truncate" style={{ color: 'var(--text-muted)' }}>
+              {video.owner?.fullName || 'Unknown Creator'}
+            </p>
+            
+            {/* Subscribe button appears on name hover */}
+            {!isOwner && user?._id !== (video.owner?._id || video.owner) && (
+              <button
+                onClick={handleToggleSub}
+                disabled={subLoading}
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold transition-all duration-300 transform ${
+                  nameHovered || isSubscribed ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-1 pointer-events-none'
+                }`}
+                style={{
+                  background: isSubscribed ? 'rgba(255,255,255,0.1)' : 'var(--brand-primary)',
+                  color: 'white',
+                  border: isSubscribed ? '1px solid rgba(255,255,255,0.1)' : 'none'
+                }}
+              >
+                {subLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
+              </button>
+            )}
+          </div>
           <p className="text-xs" style={{ color: 'var(--text-muted)' }}>
             {timeAgo(video.createdAt)}
           </p>
