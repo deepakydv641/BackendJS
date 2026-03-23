@@ -4,6 +4,7 @@ import cors from 'cors';
 import router from './routes/user.routes.js';
 import router1 from './routes/videos.routes.js';
 import router2 from './routes/subscription.routes.js';
+import router3 from './routes/comment.routes.js';
 
 const app = express();
 
@@ -21,6 +22,7 @@ console.log("Registering user routes at /api/v1/users");
 app.use("/api/v1/users", router)
 app.use("/api/v1/videos", router1)
 app.use("/api/v1/subscriptions", router2)
+app.use("/api/v1/comments", router3)
 
 // Global error handler — catches errors thrown by asyncHandler
 app.use((err, req, res, next) => {

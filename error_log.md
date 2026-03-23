@@ -145,3 +145,12 @@ Context: The inline video player on VideoCards played normally, but the browser 
 - **Root Cause**: The frontend called `videosApi.get()`, `getSubscribers()`, and `getSubscribed()` concurrently using `Promise.all`. The backend `subscription.controller.js` was designed to throw a `400 ApiError` if the subscription lists were empty (length === 0). This single rejection caused the entire `Promise.all` chain to fail.
 - **File Affected**: `src/controllers/subscription.controller.js`
 - **Fix**: Removed the `ApiError` for empty results. Modern REST APIs should gracefully return `200 OK` with `data: []` for empty sets instead of throwing client errors.
+
+
+2. The $lookup version compatibility issue
+Inside your $lookup, you used localField, foreignField, AND a pipeline all at the same time. While this is valid in MongoDB 5.0+, if your database is running MongoDB 4.x (which is extremely common), combining those three specific commands in a single $lookup is illegal. Prior to Mongo 5.0, if you wanted to use a pipeline block, you had to use 
+
+let
+ and $expr variables instead of localField/foreignField.
+
+By switching to Comment.find().populate("owner"), we entirely bypass these strict aggregation rules! populate() natively handles the messy $lookup logic under the hood across all versions of MongoDB, making your code significantly cleaner and less prone to breaking.

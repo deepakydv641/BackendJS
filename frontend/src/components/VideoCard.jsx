@@ -8,7 +8,6 @@ import toast from 'react-hot-toast';
 export default function VideoCard({ video, onDelete, showActions = false }) {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const [isPlaying, setIsPlaying] = useState(false);
   const [hovered, setHovered] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -119,25 +118,13 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
           transform: hovered ? 'scale(1.01) translateY(-2px)' : 'scale(1)',
           transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
         }}
-        onClick={() => !isPlaying && setIsPlaying(true)}
+        onClick={() => navigate(`/video/${video._id}`)}
       >
-        {isPlaying ? (
-          <video
-            src={video.videoFile?.replace('http://', 'https://')}
-            poster={video.thumbnail?.replace('http://', 'https://')}
-            controls
-            autoPlay
-            playsInline
-            className="w-full h-full object-contain bg-black"
-            onClick={(e) => e.stopPropagation()}
-          />
-        ) : (
-          <>
-            <img
-              src={video.thumbnail?.replace('http://', 'https://')}
-              alt={video.title}
-              className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-            />
+        <img
+          src={video.thumbnail?.replace('http://', 'https://')}
+          alt={video.title}
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+        />
 
             {/* Gradient overlay */}
             <div
@@ -190,8 +177,6 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
             >
               {video.views ?? 0} views
             </div>
-          </>
-        )}
       </div>
 
       {/* Meta */}
@@ -214,6 +199,7 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
           onMouseLeave={() => setNameHovered(false)}
         >
           <h3
+            onClick={() => navigate(`/video/${video._id}`)}
             className="text-sm font-semibold leading-tight line-clamp-2 transition-colors duration-200 cursor-pointer"
             style={{ color: hovered ? '#a78bfa' : 'var(--text-primary)' }}
           >
