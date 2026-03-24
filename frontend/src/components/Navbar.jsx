@@ -28,7 +28,16 @@ export default function Navbar() {
   const { pathname } = useLocation();
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
   const menuRef = useRef(null);
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      navigate(`/search/${encodeURIComponent(searchQuery.trim())}`);
+      setSearchQuery('');
+    }
+  };
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
@@ -90,22 +99,39 @@ export default function Navbar() {
           </span>
         </Link>
 
-        {/* Center Nav Links */}
+        {/* Center Nav Links & Search */}
         {user && (
-          <div className="hidden sm:flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-2xl p-1">
-            {navLinks.map(({ to, label, icon }) => {
-              const active = pathname === to;
-              return (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`nav-link ${active ? 'active' : ''}`}
-                >
-                  {icon}
-                  {label}
-                </Link>
-              );
-            })}
+          <div className="hidden sm:flex flex-1 items-center justify-center gap-4 max-w-xl mx-4">
+            <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-full p-1 w-full max-w-md">
+              <form onSubmit={handleSearch} className="flex-1 flex items-center bg-transparent px-3">
+                <svg className="w-4 h-4 text-white/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search videos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full bg-transparent border-none text-sm text-white placeholder-white/40 focus:outline-none focus:ring-0 px-3 py-1.5"
+                />
+                <button type="submit" className="sr-only">Search</button>
+              </form>
+            </div>
+            <div className="flex items-center gap-1">
+              {navLinks.map(({ to, label, icon }) => {
+                const active = pathname.startsWith(to);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`nav-link ${active ? 'active' : ''}`}
+                    title={label}
+                  >
+                    {icon}
+                  </Link>
+                );
+              })}
+            </div>
           </div>
         )}
 

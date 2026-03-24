@@ -6,6 +6,7 @@ import router1 from './routes/videos.routes.js';
 import router2 from './routes/subscription.routes.js';
 import router3 from './routes/comment.routes.js';
 import router4 from './routes/tweet.routes.js';
+import router5 from './routes/search.routes.js';
 
 const app = express();
 
@@ -25,6 +26,7 @@ app.use("/api/v1/videos", router1)
 app.use("/api/v1/subscriptions", router2)
 app.use("/api/v1/comments", router3)
 app.use("/api/v1/tweets", router4)
+app.use("/api/v1/search", router5)
 
 // Global error handler — catches errors thrown by asyncHandler
 app.use((err, req, res, next) => {
