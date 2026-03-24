@@ -15,8 +15,8 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
     const owner = await User.findById(req.user._id).select("-password -refreshToken")
 
-    if (!title || !description || !duration) {
-        throw new ApiError(400, "All fieds are Required!")
+    if (!title || !description) {
+        throw new ApiError(400, "Title and description are required!")
     }
 
     // Step 2). now take videofile and thumbnail from user
@@ -46,20 +46,11 @@ const uploadVideo = asyncHandler(async (req, res) => {
         throw new ApiError(500, "Failed to upload video or thumbnail on cloudinary")
     }
 
-    // Convert Cloudinary URL to force MP4 delivery (browser-compatible)
-    // Cloudinary may return an HLS stream URL by default, which native <video> can't play.
-    // By injecting f_mp4,vc_auto into the URL path, we force a direct MP4 delivery URL.
-    const makePlayableUrl = (url) => {
-        if (!url) return url;
-        // Insert Cloudinary transformation before the version/filename segment
-        return url.replace('/upload/', '/upload/f_mp4,vc_auto/');
-    };
-
     const createdVideo = await Video.create({
         title,
         description,
         duration: Number(duration),
-        videoFile: makePlayableUrl(cloudinaryVideo.secure_url || cloudinaryVideo.url),
+        videoFile: cloudinaryVideo.secure_url || cloudinaryVideo.url,
         thumbnail: cloudinaryThumbnail.secure_url || cloudinaryThumbnail.url,
         owner
     })

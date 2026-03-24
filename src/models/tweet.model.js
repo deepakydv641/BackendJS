@@ -8,6 +8,10 @@ const tweetSchema = new mongoose.Schema({
     owner: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User"
+    },
+    poster: {
+        type: String,
+        required: true
     }
 }, { timestamps: true })
 

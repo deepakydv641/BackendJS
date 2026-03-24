@@ -6,17 +6,24 @@ import videosApi from '../api/videosApi';
 import Navbar from '../components/Navbar';
 import Spinner from '../components/Spinner';
 import VideoCard from '../components/VideoCard';
+import TweetCard from '../components/TweetCard';
+import CreateTweetForm from '../components/CreateTweetForm';
+import { getUserTweets } from '../api/tweetsApi';
+import { useAuth } from '../context/AuthContext';
 import toast from 'react-hot-toast';
 
 export default function ChannelPage() {
   const { username } = useParams();
   const navigate = useNavigate();
   
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [videos, setVideos] = useState([]);
+  const [tweets, setTweets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [subLoading, setSubLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('videos');
 
   useEffect(() => {
     const fetchChannelData = async () => {
@@ -38,6 +45,15 @@ export default function ChannelPage() {
             v => v.owner?.username === username || v.owner === channelData._id
         );
         setVideos(channelVideos);
+        
+        // 3. Fetch tweets for Community tab
+        try {
+          const tweetRes = await getUserTweets(channelData._id);
+          setTweets(tweetRes.data.data || []);
+        } catch {
+          // Tweets failing shouldn't block the page
+          setTweets([]);
+        }
         
       } catch (err) {
         console.error("Failed to fetch channel", err);
@@ -150,23 +166,80 @@ export default function ChannelPage() {
           </div>
         </div>
 
-        <div className="w-full h-px bg-white/10 mb-8" />
-
-        {/* Channel Videos */}
-        <h3 className="text-xl font-bold text-white mb-6">Videos</h3>
-        
-        {videos.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center rounded-3xl" style={{ background: 'var(--surface-2)' }}>
-            <p className="text-gray-400">This channel hasn't uploaded any videos yet.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {videos.map(video => (
-              <VideoCard key={video._id} video={{...video, owner: profile}} />
+        {/* Tabs */}
+        <div className="border-b mb-0" style={{ borderColor: 'var(--border-subtle)' }}>
+          <div className="flex">
+            {["Videos", "Community"].map(tab => (
+              <button
+                key={tab}
+                onClick={() => setActiveTab(tab.toLowerCase())}
+                className={`px-6 py-4 text-sm font-bold uppercase tracking-widest relative transition-colors ${
+                  activeTab === tab.toLowerCase() ? 'text-white' : 'text-gray-500 hover:text-gray-300'
+                }`}
+              >
+                {tab}
+                {activeTab === tab.toLowerCase() && (
+                  <span className="absolute bottom-0 left-0 w-full h-0.5 rounded-t" style={{ background: '#e50914' }} />
+                )}
+              </button>
             ))}
+          </div>
+        </div>
+
+        {/* Videos Tab */}
+        {activeTab === 'videos' && (
+          <div className="pt-8">
+            {videos.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 rounded-2xl" style={{ background: 'var(--surface-2)' }}>
+                <svg className="w-14 h-14 mb-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M15 10l4.553-2.069A1 1 0 0121 8.87v6.26a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                </svg>
+                <p className="text-gray-500 font-medium">No videos uploaded yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                {videos.map(video => (
+                  <VideoCard key={video._id} video={{...video, owner: profile}} />
+                ))}
+              </div>
+            )}
           </div>
         )}
 
+        {/* Community Tab */}
+        {activeTab === 'community' && (
+          <div className="max-w-2xl mx-auto pt-8">
+            {/* Only show create form to the channel owner */}
+            {user && profile && user._id === profile._id && (
+              <CreateTweetForm onTweetCreated={async () => {
+                const res = await getUserTweets(profile._id);
+                setTweets(res.data.data || []);
+              }} />
+            )}
+
+            {tweets.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-24 rounded-2xl" style={{ background: 'var(--surface-2)' }}>
+                <svg className="w-14 h-14 mb-4 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+                </svg>
+                <p className="text-gray-500 font-medium">No posts yet</p>
+                {user && profile && user._id === profile._id && (
+                  <p className="text-gray-600 text-sm mt-1">Create your first post above!</p>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-5">
+                {tweets.map(tweet => (
+                  <TweetCard
+                    key={tweet._id}
+                    tweet={tweet}
+                    onDelete={(id) => setTweets(prev => prev.filter(t => t._id !== id))}
+                  />
+                ))}
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

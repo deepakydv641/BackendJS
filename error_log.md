@@ -154,3 +154,23 @@ let
  and $expr variables instead of localField/foreignField.
 
 By switching to Comment.find().populate("owner"), we entirely bypass these strict aggregation rules! populate() natively handles the messy $lookup logic under the hood across all versions of MongoDB, making your code significantly cleaner and less prone to breaking.
+
+---
+
+## 16. Tweet Poster `Cast to string failed` Error
+- **Context**: Creating a new tweet with an image upload fails with a Mongoose Casting Error at path "poster".
+- **Root Cause**: `uploadOnCloudinary` returns the entire Cloudinary API response object. This entire object was being passed to `Tweet.create()`, but the `poster` field in the Mongoose Schema is explicitly typed as a `String`.
+- **File Affected**: `src/controllers/tweet.controller.js`
+- **Fix**: Extracted just the secure string URL from the Cloudinary object before saving to DB: `poster: posterUrl.secure_url`.
+
+## 17. Video Playback Blocked / Native Fullscreen Disabled
+- **Context**: Videos uploaded to the platform show a black screen, don't auto-play, and the native browser `<video>` fullscreen button is grayed out.
+- **Root Cause**: The `uploadVideo` controller was intercepting Cloudinary URLs and forcibly injecting a `f_mp4,vc_auto` transformation via `makePlayableUrl()`. This manipulation corrupted standard uploads and caused native browser parsers to strictly disable the `<video>` element due to invalid or blocked mixed-content media.
+- **File Affected**: `src/controllers/video.controller.js`
+- **Fix**: Completely removed the `makePlayableUrl` transformation. Saved the raw `cloudinaryVideo.secure_url` directly to MongoDB. Modern HTML5 video players flawlessly parse these raw Cloudinary URLs.
+
+## 18. Video Upload "All fields are required" False Positive
+- **Context**: Attempting to upload a new video via the UI results in an API failure stating "All fields are required!".
+- **Root Cause**: The frontend React form explicitly marks the `duration` field as "— optional" and does not strictly require it. However, the backend `uploadVideo` controller strictly mandated `!duration` in its validation check.
+- **File Affected**: `src/controllers/video.controller.js`
+- **Fix**: Removed `!duration` from the backend `if` conditioning, allowing videos to be uploaded normally without manually specifying the duration sequence.
