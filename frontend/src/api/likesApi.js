@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const likesApi = axios.create({
-  baseURL: '/api/v1/likes',
+  baseURL: 'https://sharewithall.onrender.com/api/v1/likes',
   withCredentials: true,
 });
 
@@ -21,7 +21,7 @@ likesApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          '/api/v1/users/refresh-access-token',
+          'https://sharewithall.onrender.com/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

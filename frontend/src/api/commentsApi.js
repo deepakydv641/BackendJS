@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const commentsApi = axios.create({
-  baseURL: '/api/v1/comments',
+  baseURL: 'https://sharewithall.onrender.com/api/v1/comments',
   withCredentials: true,
 });
 
@@ -23,7 +23,7 @@ commentsApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          '/api/v1/users/refresh-access-token',
+          'https://sharewithall.onrender.com/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

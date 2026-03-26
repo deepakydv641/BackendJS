@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const usersApi = axios.create({
-  baseURL: '/api/v1/users',
+  baseURL: 'https://sharewithall.onrender.com/api/v1/users',
   withCredentials: true,
 });
 
@@ -23,7 +23,7 @@ usersApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          '/api/v1/users/refresh-access-token',
+          'https://sharewithall.onrender.com/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

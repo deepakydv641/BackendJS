@@ -12,7 +12,7 @@ import router6 from './routes/like.routes.js';
 const app = express();
 
 app.use(cors({
-    origin: process.env.CORS_ORIGIN || "*",
+    origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN || true,
     credentials: true
 }))
 
