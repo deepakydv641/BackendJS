@@ -11,6 +11,7 @@ import EditVideoPage from './pages/EditVideoPage';
 import ChannelPage from './pages/ChannelPage';
 import VideoDetailPage from './pages/VideoDetailPage';
 import SearchPage from './pages/SearchPage';
+import LikedVideosPage from './pages/LikedVideosPage';
 import Spinner from './components/Spinner';
 
 function PrivateRoute({ children }) {
@@ -40,6 +41,7 @@ export default function App() {
       <Route path="/video/:videoId" element={<PrivateRoute><VideoDetailPage /></PrivateRoute>} />
       <Route path="/channel/:username" element={<PrivateRoute><ChannelPage /></PrivateRoute>} />
       <Route path="/search/:query" element={<PrivateRoute><SearchPage /></PrivateRoute>} />
+      <Route path="/liked-videos" element={<PrivateRoute><LikedVideosPage /></PrivateRoute>} />
       <Route path="*" element={<Navigate to="/login" replace />} />
     </Routes>
   );

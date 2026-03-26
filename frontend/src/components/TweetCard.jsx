@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { updateTweet, deleteTweet } from '../api/tweetsApi';
+import { toggleTweetLike } from '../api/likesApi';
 import toast from 'react-hot-toast';
 
 function timeAgo(date) {
@@ -25,6 +26,7 @@ export default function TweetCard({ tweet, onDelete }) {
     const [editing, setEditing] = useState(false);
     const [editContent, setEditContent] = useState(tweet.content);
     const [liveContent, setLiveContent] = useState(tweet.content);
+    const [isLiked, setIsLiked] = useState(false);
 
     const owner = tweet.owner;
     const isOwner = user && owner && (user._id === owner._id || user._id === owner);
@@ -49,6 +51,20 @@ export default function TweetCard({ tweet, onDelete }) {
             onDelete?.(tweet._id);
         } catch {
             toast.error('Failed to delete post');
+        }
+    };
+
+    const handleToggleLike = async () => {
+        if (!user) {
+            toast.error('Please login to like');
+            return;
+        }
+        try {
+            await toggleTweetLike(tweet._id);
+            setIsLiked(!isLiked);
+            toast.success(isLiked ? 'Like removed' : 'Tweet liked');
+        } catch (error) {
+            toast.error('Failed to toggle like');
         }
     };
 
@@ -191,13 +207,14 @@ export default function TweetCard({ tweet, onDelete }) {
                     style={{ borderColor: 'var(--border-subtle)' }}
                 >
                     <button
+                        onClick={handleToggleLike}
                         className="flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-red-400"
-                        style={{ color: 'var(--text-muted)' }}
+                        style={{ color: isLiked ? '#f43f5e' : 'var(--text-muted)' }}
                     >
-                        <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                        <svg className="w-4 h-4" fill={isLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isLiked ? 0 : 1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                         </svg>
-                        Like
+                        {isLiked ? 'Liked' : 'Like'}
                     </button>
                     <button
                         className="flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-white"

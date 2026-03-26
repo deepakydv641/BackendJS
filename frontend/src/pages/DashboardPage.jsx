@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import videosApi from '../api/videosApi';
 import { getSubscribers, getSubscribed } from '../api/subscriptionsApi';
+import { getLikedVideos } from '../api/likesApi';
 import VideoCard from '../components/VideoCard';
 import Spinner from '../components/Spinner';
 
@@ -85,6 +86,7 @@ export default function DashboardPage() {
   const [videos, setVideos] = useState([]);
   const [subscribers, setSubscribers] = useState([]);
   const [subscribedTo, setSubscribedTo] = useState([]);
+  const [likedVideos, setLikedVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [activeTab, setActiveTab] = useState('videos'); // 'videos' | 'subscribers' | 'subscribed'
@@ -92,14 +94,16 @@ export default function DashboardPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [vRes, sRes, stRes] = await Promise.all([
+        const [vRes, sRes, stRes, lRes] = await Promise.all([
           videosApi.get('/your-videos'),
           getSubscribers(user?._id),
-          getSubscribed(user?._id)
+          getSubscribed(user?._id),
+          getLikedVideos()
         ]);
         setVideos(vRes.data.data || []);
         setSubscribers(sRes.data.data || []);
         setSubscribedTo(stRes.data.data || []);
+        setLikedVideos(lRes.data.data || []);
       } catch (err) {
         console.error("Failed to fetch dashboard data", err);
         setError("Failed to load your profile data.");
@@ -238,6 +242,13 @@ export default function DashboardPage() {
                 Subscribed ({subscribedTo.length})
                 {activeTab === 'subscribed' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500 rounded-full" />}
               </button>
+              <button 
+                onClick={() => setActiveTab('liked')}
+                className={`pb-3 text-sm font-bold transition-all px-1 relative ${activeTab === 'liked' ? 'text-white' : 'text-gray-500 hover:text-gray-300'}`}
+              >
+                Liked Videos ({likedVideos.length})
+                {activeTab === 'liked' && <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-violet-500 rounded-full" />}
+              </button>
             </div>
 
             <div
@@ -293,7 +304,7 @@ export default function DashboardPage() {
                     ))
                   )}
                 </div>
-              ) : (
+              ) : activeTab === 'subscribed' ? (
                 <div className="flex flex-col gap-4">
                   {subscribedTo.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -314,7 +325,22 @@ export default function DashboardPage() {
                     ))
                   )}
                 </div>
-              )}
+              ) : activeTab === 'liked' ? (
+                <div className="flex flex-col gap-4">
+                  {likedVideos.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center h-64 text-center">
+                      <p className="text-sm text-gray-500">You haven't liked any videos yet.</p>
+                      <Link to="/home" className="mt-4 btn-primary py-2 px-6 rounded-xl font-medium">Browse Videos</Link>
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 place-content-start">
+                      {likedVideos.map(like => (
+                        like.video ? <VideoCard key={like._id} video={like.video} /> : null
+                      ))}
+                    </div>
+                  )}
+                </div>
+              ) : null}
             </div>
           </div>
 

@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import videosApi from '../api/videosApi';
 import { toggleSubscription, getSubscribed } from '../api/subscriptionsApi';
+import { toggleVideoLike, getLikedVideos } from '../api/likesApi';
 import Navbar from '../components/Navbar';
 import CommentSection from '../components/CommentSection';
 import Spinner from '../components/Spinner';
@@ -17,6 +18,8 @@ export default function VideoDetailPage() {
     const [loading, setLoading] = useState(true);
     const [isSubscribed, setIsSubscribed] = useState(false);
     const [subLoading, setSubLoading] = useState(false);
+    const [isLiked, setIsLiked] = useState(false);
+    const [likeLoading, setLikeLoading] = useState(false);
 
     useEffect(() => {
         const fetchVideo = async () => {
@@ -44,6 +47,14 @@ export default function VideoDetailPage() {
                     const subbed = list.some(s => s.subscribedDetail?.[0]?._id === vidData.owner._id || s.channel === vidData.owner._id);
                     setIsSubscribed(subbed);
                 }
+
+                // Check liked status
+                if (user) {
+                    const likedRes = await getLikedVideos().catch(() => ({ data: { data: [] } }));
+                    const likedList = likedRes.data?.data || [];
+                    const liked = likedList.some(like => like.video?._id === videoId || like.video === videoId);
+                    setIsLiked(liked);
+                }
             } catch (error) {
                 console.error('Failed to fetch video', error);
                 toast.error('Failed to load video');
@@ -66,6 +77,20 @@ export default function VideoDetailPage() {
             toast.error('Action failed');
         } finally {
             setSubLoading(false);
+        }
+    };
+
+    const handleToggleLike = async () => {
+        if (!user) return navigate('/login');
+        setLikeLoading(true);
+        try {
+            await toggleVideoLike(videoId);
+            setIsLiked(!isLiked);
+            toast.success(isLiked ? 'Like removed' : 'Video liked');
+        } catch (err) {
+            toast.error('Failed to toggle like');
+        } finally {
+            setLikeLoading(false);
         }
     };
 
@@ -140,19 +165,38 @@ export default function VideoDetailPage() {
                             </div>
                         </div>
 
-                        {!isOwner && user?._id !== (video.owner?._id || video.owner) && (
+                        <div className="flex items-center gap-3 mt-4 sm:mt-0">
                             <button
-                                onClick={handleToggleSub}
-                                disabled={subLoading}
-                                className="px-6 py-2.5 rounded-full font-bold transition-all text-sm"
+                                onClick={handleToggleLike}
+                                disabled={likeLoading}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-full font-bold transition-all text-sm"
                                 style={{
-                                    background: isSubscribed ? 'rgba(255,255,255,0.1)' : 'var(--text-primary)',
-                                    color: isSubscribed ? 'var(--text-primary)' : 'var(--surface-1)',
+                                    background: isLiked ? 'rgba(124,58,237,0.1)' : 'var(--surface-2)',
+                                    color: isLiked ? '#a78bfa' : 'var(--text-primary)',
+                                    border: '1px solid',
+                                    borderColor: isLiked ? 'rgba(124,58,237,0.3)' : 'rgba(255,255,255,0.1)'
                                 }}
                             >
-                                {subLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
+                                <svg className="w-5 h-5" fill={isLiked ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor" strokeWidth={isLiked ? 0 : 2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                </svg>
+                                {likeLoading ? '...' : isLiked ? 'Liked' : 'Like'}
                             </button>
-                        )}
+
+                            {!isOwner && user?._id !== (video.owner?._id || video.owner) && (
+                                <button
+                                    onClick={handleToggleSub}
+                                    disabled={subLoading}
+                                    className="px-6 py-2.5 rounded-full font-bold transition-all text-sm"
+                                    style={{
+                                        background: isSubscribed ? 'rgba(255,255,255,0.1)' : 'var(--text-primary)',
+                                        color: isSubscribed ? 'var(--text-primary)' : 'var(--surface-1)',
+                                    }}
+                                >
+                                    {subLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}
+                                </button>
+                            )}
+                        </div>
                     </div>
 
                     {/* Description */}

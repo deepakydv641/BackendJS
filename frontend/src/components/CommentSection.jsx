@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import commentsApi from '../api/commentsApi';
+import { toggleCommentLike } from '../api/likesApi';
 import toast from 'react-hot-toast';
 
 export default function CommentSection({ videoId }) {
@@ -13,6 +14,7 @@ export default function CommentSection({ videoId }) {
     const [editContent, setEditContent] = useState('');
     const [isInputFocused, setIsInputFocused] = useState(false);
     const [activeMenuId, setActiveMenuId] = useState(null);
+    const [likedComments, setLikedComments] = useState({});
 
     const fetchComments = async () => {
         try {
@@ -69,6 +71,20 @@ export default function CommentSection({ videoId }) {
             toast.success('Comment deleted');
         } catch (error) {
             toast.error('Failed to delete comment');
+        }
+    };
+
+    const handleToggleCommentLike = async (commentId) => {
+        if (!user) {
+            toast.error('Please login to like');
+            return;
+        }
+        try {
+            await toggleCommentLike(commentId);
+            setLikedComments(prev => ({ ...prev, [commentId]: !prev[commentId] }));
+            toast.success(likedComments[commentId] ? 'Like removed' : 'Comment liked');
+        } catch (error) {
+            toast.error('Failed to toggle like');
         }
     };
 
@@ -237,9 +253,9 @@ export default function CommentSection({ videoId }) {
 
                                     {/* Interaction Buttons (Like, Dislike, Reply) */}
                                     <div className="flex items-center gap-4 mt-2">
-                                        <button className="flex items-center gap-1.5 hover:bg-white/10 rounded-full p-1.5 transition-colors text-white/70 hover:text-white" aria-label="Like">
-                                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
+                                        <button onClick={() => handleToggleCommentLike(comment._id)} className="flex items-center gap-1.5 hover:bg-white/10 rounded-full p-1.5 transition-colors text-white/70 hover:text-white" aria-label="Like" style={{ color: likedComments[comment._id] ? '#a78bfa' : 'currentColor' }}>
+                                            <svg className="w-4 h-4" fill={likedComments[comment._id] ? "currentColor" : "none"} viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={likedComments[comment._id] ? 0 : 1.5} d="M14 10h4.764a2 2 0 011.789 2.894l-3.5 7A2 2 0 0115.263 21h-4.017c-.163 0-.326-.02-.485-.06L7 20m7-10V5a2 2 0 00-2-2h-.095c-.5 0-.905.405-.905.905 0 .714-.211 1.412-.608 2.006L7 11v9m7-10h-2M7 20H5a2 2 0 01-2-2v-6a2 2 0 012-2h2.5" />
                                             </svg>
                                         </button>
                                         <button className="flex items-center gap-1.5 hover:bg-white/10 rounded-full p-1.5 transition-colors text-white/70 hover:text-white" aria-label="Dislike">

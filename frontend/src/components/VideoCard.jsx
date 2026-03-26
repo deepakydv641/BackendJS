@@ -187,7 +187,7 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
             <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white' }}>
-              {(video.owner?.fullName || 'U')[0].toUpperCase()}
+              {(video.owner?.fullName || video.owner?.username || 'U')[0].toUpperCase()}
             </div>
           )}
         </div>
@@ -207,7 +207,7 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
           </h3>
           <div className="flex items-center gap-2 mt-0.5 min-h-[1.25rem]">
             <p className="text-xs font-medium truncate" style={{ color: 'var(--text-muted)' }}>
-              {video.owner?.fullName || 'Unknown Creator'}
+              {video.owner?.fullName || video.owner?.username || 'Unknown Creator'}
             </p>
             
             {/* Subscribe button appears on name hover */}
