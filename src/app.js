@@ -22,6 +22,9 @@ app.use(express.static("public"))
 app.use(cookieParser())
 
 console.log("Registering user routes at /api/v1/users");
+app.get("/", (req, res) => {
+    res.send("Backend is running 🚀");
+});
 app.use("/api/v1/users", router)
 app.use("/api/v1/videos", router1)
 app.use("/api/v1/subscriptions", router2)
