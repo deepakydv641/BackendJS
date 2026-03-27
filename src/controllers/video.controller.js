@@ -52,7 +52,8 @@ const uploadVideo = asyncHandler(async (req, res) => {
         duration: Number(duration),
         videoFile: cloudinaryVideo.secure_url || cloudinaryVideo.url,
         thumbnail: cloudinaryThumbnail.secure_url || cloudinaryThumbnail.url,
-        owner
+        owner,
+        public_id: cloudinaryVideo.public_id
     })
 
     if (!createdVideo) {
@@ -108,7 +109,7 @@ const updateVideoDetails = asyncHandler(async (req, res) => {
     if (!video) {
         throw new ApiError(400, "Video not FOUND")
     }
-    
+
     // Check if user is the owner
     if (video.owner.toString() !== req.user._id.toString()) {
         throw new ApiError(403, "You are not authorized to edit this video")
