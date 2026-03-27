@@ -30,12 +30,6 @@ const userSchema = mongoose.Schema({
     coverImage: {
         type: String
     },
-    Otp: {
-        type: String,
-    },
-    OtpExpiry: {
-        type: Date
-    },
     watchHistory: [   // user jab ak baar register hoga toh watch history ki jarurat nahi padegi
         {
             type: mongoose.Schema.Types.ObjectId,

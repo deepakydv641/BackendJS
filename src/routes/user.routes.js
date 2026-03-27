@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { loginUser, registerUser, logoutUser, getRefreshedAccessToken, getCurrentUser, changeCurrentPassword, updateAccountDetails, getChannelProfile } from "../controllers/user.controller.js";
+import { forgotPassword, otpValidation, resetPassword } from "../controllers/forgotpassword.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
@@ -26,5 +27,10 @@ router.route("/change-password").patch(verifyJWT, changeCurrentPassword)
 router.route("/current-user").get(verifyJWT, getCurrentUser)
 router.route("/update-account").patch(verifyJWT, updateAccountDetails)
 router.route("/c/:username").get(verifyJWT, getChannelProfile)
+
+// Forgot-password flow (no auth required — user is logged out)
+router.route("/forgot-password").post(forgotPassword)
+router.route("/verify-otp").post(otpValidation)
+router.route("/reset-password").post(resetPassword)
 
 export default router;

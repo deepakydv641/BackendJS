@@ -12,6 +12,7 @@ import ChannelPage from './pages/ChannelPage';
 import VideoDetailPage from './pages/VideoDetailPage';
 import SearchPage from './pages/SearchPage';
 import LikedVideosPage from './pages/LikedVideosPage';
+import ForgotPasswordPage from './pages/ForgotPasswordPage';
 import Spinner from './components/Spinner';
 
 function PrivateRoute({ children }) {
@@ -32,6 +33,7 @@ export default function App() {
       <Route path="/" element={<Navigate to="/home" replace />} />
       <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
       <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+      <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
       <Route path="/home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
       <Route path="/dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
       <Route path="/change-password" element={<PrivateRoute><ChangePasswordPage /></PrivateRoute>} />

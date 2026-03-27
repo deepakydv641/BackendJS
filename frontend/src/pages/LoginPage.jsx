@@ -149,6 +149,16 @@ export default function LoginPage() {
               </div>
             </div>
 
+            <div className="flex justify-end">
+              <Link
+                to="/forgot-password"
+                className="text-xs font-medium transition-colors"
+                style={{ color: '#a78bfa' }}
+              >
+                Forgot password?
+              </Link>
+            </div>
+
             <button type="submit" disabled={loading} className="btn-primary w-full flex items-center justify-center gap-2 mt-2">
               {loading
                 ? <><Spinner size="sm" /><span>Signing in…</span></>

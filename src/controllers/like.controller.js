@@ -8,7 +8,7 @@ import { Like } from "../models/like.model.js"
 import { Comment } from "../models/comment.model.js";
 import { Tweet } from "../models/tweet.model.js";
 
-console.log("Registering video controller");
+console.log("Registering Like controller");
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
