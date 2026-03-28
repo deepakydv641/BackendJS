@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const forgotPasswordApi = axios.create({
-  baseURL: 'https://sharewithall.onrender.com/api/v1/users',
+  baseURL: 'http://localhost:8000/api/v1/users',
   withCredentials: true,
 });
 

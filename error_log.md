@@ -174,3 +174,21 @@ By switching to Comment.find().populate("owner"), we entirely bypass these stric
 - **Root Cause**: The frontend React form explicitly marks the `duration` field as "— optional" and does not strictly require it. However, the backend `uploadVideo` controller strictly mandated `!duration` in its validation check.
 - **File Affected**: `src/controllers/video.controller.js`
 - **Fix**: Removed `!duration` from the backend `if` conditioning, allowing videos to be uploaded normally without manually specifying the duration sequence.
+
+## 19. Redis Connection "WRONGPASS" Error
+- **Context**: The backend failed to connect to Redis Cloud, throwing `WRONGPASS invalid username-password pair`, even though the exact password was present in the `.env` file.
+- **Root Cause**: Node.js ES Modules (`import`) hoist all module resolutions before executing file bodies. Because `index.js` imported dependencies (`app.js` -> `user.routes.js` -> `forgotpassword.controller.js` -> `redis.js`) before running `dotenv.config()`, the execution of `redis.js` occurred when `process.env.REDIS_PASSWORD` was still `undefined`.
+- **File Affected**: `src/db/redis.js`
+- **Fix**: Added `import dotenv from "dotenv"; dotenv.config();` directly at the top of `redis.js` to ensure environmental variables are loaded at the exact moment the file executes.
+
+## 20. Cloudinary Upload "Failed to upload video"
+- **Context**: Uploading files suddenly failed with a 500 API Error indicating Cloudinary upload failure, despite working previously.
+- **Root Cause**: This is the exact same ES Module hoisting bug as Error #19. `cloudinary.js` was executing and mapping its configuration keys (`process.env.CLOUDINARY_API_KEY`) when they were strictly `undefined`, completely corrupting the Cloudinary SDK initialization.
+- **File Affected**: `src/utils/cloudinary.js`
+- **Fix**: Added `dotenv.config()` forcibly at the top of the file before invoking `cloudinary.config({...})`.
+
+## 21. Frontend Localhost CORS Blocking Request
+- **Context**: After disconnecting the frontend from the deployed Render backend to test locally against `localhost:8000`, the frontend threw a generic "Login Failed" error, with the browser silently failing the `POST /login` request.
+- **Root Cause**: The `.env` file on the backend explicitly declared `CORS_ORIGIN=https://localhost:8000`. When the Vite frontend (running on `http://localhost:5173`) attempted a cross-origin request involving `withCredentials: true`, the browser initiated a Preflight Options check. The strict URL mismatch caused the browser to permanently Block the request for security violations.
+- **File Affected**: `.env`
+- **Fix**: Relaxed the variable to `CORS_ORIGIN=*`. Due to the dynamic configuration in Express `cors` middleware (`origin: process.env.CORS_ORIGIN === "*" ? true : ...`), setting `*` safely signals the backend to dynamically reflect the exact request origin, enabling successful Preflight handshakes.

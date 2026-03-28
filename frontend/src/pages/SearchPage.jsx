@@ -30,7 +30,7 @@ export default function SearchPage() {
       setLoading(true);
       try {
         const token = localStorage.getItem('accessToken');
-        const res = await axios.get(`https://sharewithall.onrender.com/api/v1/search/${encodeURIComponent(query)}`, { 
+        const res = await axios.get(`http://localhost:8000/api/v1/search/${encodeURIComponent(query)}`, { 
             withCredentials: true,
             headers: token ? { Authorization: `Bearer ${token}` } : {}
         });

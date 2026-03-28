@@ -27,4 +27,4 @@ export const sendMail = async (to, subject, text) => {
         console.log("Email error:", error);
         throw error;   // propagate so caller can handle it
     }
-};
+};

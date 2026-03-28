@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import videosApi from '../api/videosApi';
+import usersApi from '../api/usersApi';
 import VideoCard from '../components/VideoCard';
 import Spinner from '../components/Spinner';
 import TweetCard from '../components/TweetCard';
@@ -47,8 +48,10 @@ export default function HomePage() {
   const [activeTab, setActiveTab] = useState('videos');
   const [videos, setVideos] = useState([]);
   const [tweets, setTweets] = useState([]);
+  const [history, setHistory] = useState([]);
   const [videosLoading, setVideosLoading] = useState(true);
   const [tweetsLoading, setTweetsLoading] = useState(true);
+  const [historyLoading, setHistoryLoading] = useState(false);
 
   const fetchTweets = () => {
     setTweetsLoading(true);
@@ -67,6 +70,24 @@ export default function HomePage() {
     fetchTweets();
   }, []);
 
+  useEffect(() => {
+    if (activeTab === 'history') {
+      if (!user) {
+        toast.error("Please login to see watch history");
+        return;
+      }
+      setHistoryLoading(true);
+      usersApi.get('/watch-history')
+        .then(({ data }) => setHistory(data.data[0]?.WatchHistory || data.data || []))
+        .catch((err) => {
+            console.error(err);
+            toast.error(err.response?.data?.message || 'Failed to load history');
+            setHistory([]);
+        })
+        .finally(() => setHistoryLoading(false));
+    }
+  }, [activeTab, user]);
+
   const tabs = [
     { key: 'videos', label: 'Videos', icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -76,6 +97,11 @@ export default function HomePage() {
     { key: 'community', label: 'Community', icon: (
       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
         <path strokeLinecap="round" strokeLinejoin="round" d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+      </svg>
+    )},
+    { key: 'history', label: 'History', icon: (
+      <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+        <path strokeLinecap="round" strokeLinejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
       </svg>
     )},
   ];
@@ -97,10 +123,14 @@ export default function HomePage() {
               </span>
             </div>
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight" style={{ color: 'var(--text-primary)' }}>
-              {activeTab === 'videos' ? <>Explore&nbsp;<span style={{ background: 'linear-gradient(135deg,#e50914,#f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Videos</span></> : <>Community&nbsp;<span style={{ background: 'linear-gradient(135deg,#e50914,#f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Posts</span></>}
+              {activeTab === 'videos' ? <>Explore&nbsp;<span style={{ background: 'linear-gradient(135deg,#e50914,#f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Videos</span></> : 
+               activeTab === 'community' ? <>Community&nbsp;<span style={{ background: 'linear-gradient(135deg,#e50914,#f43f5e)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>Posts</span></> :
+               <>Watch&nbsp;<span style={{ background: 'linear-gradient(135deg,#7c3aed,#4f46e5)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>History</span></>}
             </h1>
             <p className="mt-1.5 text-sm" style={{ color: 'var(--text-muted)' }}>
-              {activeTab === 'videos' ? 'Discover amazing content from the community' : 'See what creators are sharing'}
+              {activeTab === 'videos' ? 'Discover amazing content from the community' : 
+               activeTab === 'community' ? 'See what creators are sharing' :
+               'Review videos you have watched recently'}
             </p>
           </div>
 
@@ -203,6 +233,37 @@ export default function HomePage() {
               </div>
             )}
           </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          historyLoading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8 pb-12">
+              {Array.from({ length: 8 }).map((_, i) => <VideoCardSkeleton key={i} />)}
+            </div>
+          ) : history.length > 0 ? (
+             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8 pb-12">
+              {history.map((video, i) => (
+                <div key={video._id} style={{ animationDelay: `${i * 0.05}s` }}>
+                  <VideoCard video={video} />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center py-28 text-center">
+              <div className="w-24 h-24 rounded-3xl flex items-center justify-center mb-6 animate-float"
+                style={{ background: 'linear-gradient(135deg,rgba(124,58,237,0.15),rgba(79,70,229,0.15))', border: '1px solid rgba(124,58,237,0.3)', boxShadow: '0 0 40px rgba(124,58,237,0.15)' }}>
+                <svg className="w-12 h-12" style={{ color: '#7c3aed' }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>No watch history</h2>
+              <p className="text-sm max-w-xs mb-8" style={{ color: 'var(--text-muted)' }}>Videos you watch will appear here.</p>
+              <button onClick={() => setActiveTab('videos')} className="btn-primary flex items-center gap-2">
+                Explore Videos
+              </button>
+            </div>
+          )
         )}
 
       </div>

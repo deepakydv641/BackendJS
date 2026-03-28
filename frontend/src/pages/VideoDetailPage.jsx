@@ -54,6 +54,9 @@ export default function VideoDetailPage() {
                     const likedList = likedRes.data?.data || [];
                     const liked = likedList.some(like => like.video?._id === videoId || like.video === videoId);
                     setIsLiked(liked);
+                    
+                    // Add to watch history silently
+                    videosApi.post(`/watch-history/${videoId}`).catch(console.error);
                 }
             } catch (error) {
                 console.error('Failed to fetch video', error);

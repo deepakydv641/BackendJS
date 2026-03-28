@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { loginUser, registerUser, logoutUser, getRefreshedAccessToken, getCurrentUser, changeCurrentPassword, updateAccountDetails, getChannelProfile } from "../controllers/user.controller.js";
+import { loginUser, registerUser, logoutUser, getRefreshedAccessToken, getCurrentUser, changeCurrentPassword, updateAccountDetails, getChannelProfile, getWatchHistory } from "../controllers/user.controller.js";
 import { forgotPassword, otpValidation, resetPassword } from "../controllers/forgotpassword.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
@@ -32,5 +32,6 @@ router.route("/c/:username").get(verifyJWT, getChannelProfile)
 router.route("/forgot-password").post(forgotPassword)
 router.route("/verify-otp").post(otpValidation)
 router.route("/reset-password").post(resetPassword)
+router.route("/watch-history").get(verifyJWT, getWatchHistory)
 
 export default router;

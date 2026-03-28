@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
-import { uploadVideo, getAllVideos, updateVideoDetails, getYourVideos, deleteVideo } from "../controllers/video.controller.js";
+import { uploadVideo, getAllVideos, updateVideoDetails, getYourVideos, deleteVideo, addToWatchHistory } from "../controllers/video.controller.js";
 
 const router1 = Router();
 
@@ -57,6 +57,11 @@ router1.route("/your-videos").get(
 router1.route("/delete-video/:videoId").delete(
     verifyJWT,
     deleteVideo
+)
+//  route to add video to watch history
+router1.route("/watch-history/:videoId").post(
+    verifyJWT,
+    addToWatchHistory
 )
 
 export default router1;

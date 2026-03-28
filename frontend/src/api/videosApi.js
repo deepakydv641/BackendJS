@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const videosApi = axios.create({
-  baseURL: 'https://sharewithall.onrender.com/api/v1/videos',
+  baseURL: 'http://localhost:8000/api/v1/videos',
   withCredentials: true, // send cookies with every request
 });
 
@@ -23,7 +23,7 @@ videosApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          'https://sharewithall.onrender.com/api/v1/users/refresh-access-token',
+          'http://localhost:8000/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

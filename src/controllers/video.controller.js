@@ -198,10 +198,56 @@ const deleteVideo = asyncHandler(async (req, res) => {
         )
 })
 
+const addToWatchHistory = asyncHandler(async (req, res) => {
+    // user ko toh find krna hoga current logged in user
+    // current video ko bhi 
+    // user ko find krna hoga by ID
+    // the watch history array mein videoId ko add krna hoga ki duplicates na ho aur 
+
+    const UserId = req.user?._id
+    const { videoId } = req.params
+
+    if (!videoId || !UserId) {
+        throw new ApiError(400, "video and user not found")
+    }
+
+    const UserExists = await User.findByIdAndUpdate(
+        UserId,
+        {
+            $addToSet: {   // prevents duplicates
+                watchHistory: videoId
+            }
+        },
+        {
+            new: true
+        }
+    )
+
+    const VideoExists = await Video.findByIdAndUpdate(
+        videoId,
+        {
+            $inc: { views: 0.5 }
+        },
+        {
+            new: true
+        }
+    )
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                {},
+                "Added to Watch History Of user"
+            )
+        )
+})
+
 export {
     uploadVideo,
     getAllVideos,
     updateVideoDetails,
     getYourVideos,
-    deleteVideo
+    deleteVideo,
+    addToWatchHistory
 }
