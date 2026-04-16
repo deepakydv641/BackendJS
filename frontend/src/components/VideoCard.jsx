@@ -38,6 +38,18 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  // Listen for global subscription toggle events
+  useEffect(() => {
+    const handleGlobalToggle = (e) => {
+      const channelId = video.owner?._id || video.owner;
+      if (e.detail?.channelId === channelId) {
+        setIsSubscribed(e.detail.isSubscribed);
+      }
+    };
+    window.addEventListener('subscriptionToggled', handleGlobalToggle);
+    return () => window.removeEventListener('subscriptionToggled', handleGlobalToggle);
+  }, [video]);
+
   const isOwner = showActions && user?._id && (user._id === video.owner?._id || user._id === video.owner);
 
   const handleDelete = async (e) => {
@@ -68,9 +80,16 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
     if (!user) return navigate('/login');
     setSubLoading(true);
     try {
-      await toggleSubscription(video.owner?._id || video.owner);
-      setIsSubscribed(!isSubscribed);
-      toast.success(isSubscribed ? 'Unsubscribed' : 'Subscribed');
+      const channelId = video.owner?._id || video.owner;
+      await toggleSubscription(channelId);
+      const newStatus = !isSubscribed;
+      setIsSubscribed(newStatus);
+      toast.success(newStatus ? 'Subscribed' : 'Unsubscribed');
+      
+      // Dispatch event to sync ALL other videos from this channel instantly
+      window.dispatchEvent(new CustomEvent('subscriptionToggled', { 
+        detail: { channelId, isSubscribed: newStatus } 
+      }));
     } catch (err) {
       toast.error('Action failed');
     } finally {

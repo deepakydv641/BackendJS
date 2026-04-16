@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { updateTweet, deleteTweet } from '../api/tweetsApi';
 import { toggleTweetLike } from '../api/likesApi';
 import toast from 'react-hot-toast';
+import CommentSection from './CommentSection';
 
 function timeAgo(date) {
     const diff = Date.now() - new Date(date).getTime();
@@ -27,6 +28,7 @@ export default function TweetCard({ tweet, onDelete }) {
     const [editContent, setEditContent] = useState(tweet.content);
     const [liveContent, setLiveContent] = useState(tweet.content);
     const [isLiked, setIsLiked] = useState(false);
+    const [showComments, setShowComments] = useState(false);
 
     const owner = tweet.owner;
     const isOwner = user && owner && (user._id === owner._id || user._id === owner);
@@ -217,14 +219,22 @@ export default function TweetCard({ tweet, onDelete }) {
                         {isLiked ? 'Liked' : 'Like'}
                     </button>
                     <button
+                        onClick={() => setShowComments(!showComments)}
                         className="flex items-center gap-1.5 text-xs font-medium transition-colors hover:text-white"
-                        style={{ color: 'var(--text-muted)' }}
+                        style={{ color: showComments ? 'white' : 'var(--text-muted)' }}
                     >
                         <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                             <path strokeLinecap="round" strokeLinejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                         </svg>
                         Comment
                     </button>
+                </div>
+            )}
+
+            {/* Comments Area */}
+            {showComments && (
+                <div className="px-5 pb-5 border-t pt-2" style={{ borderColor: 'var(--border-subtle)' }}>
+                    <CommentSection tweetId={tweet._id} />
                 </div>
             )}
         </article>

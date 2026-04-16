@@ -8,7 +8,7 @@ import { Subscription } from "../models/subscription.model.js";
 import { Comment } from "../models/comment.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-console.log("Registering Comment controller");
+
 
 // some one can add the comment only if  he is signed in 
 // and he will get the videoId from req.params
@@ -33,6 +33,38 @@ const addComment = asyncHandler(async (req, res) => {
     const createdComment = await Comment.create({
         content: Content,
         video: videoId,
+        owner: UserId
+    })
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                createdComment,
+                "Comment added succesfully"
+            )
+
+        )
+})
+const addCommentOnTweet = asyncHandler(async (req, res) => {
+    const tweetId = req.params?.tweetId
+
+    // content toh lena pdega na user se uskae bina thodi na comment hone wala hain
+
+    const { Content } = req.body
+    const UserId = req.user?._id
+
+    if (!Content) {
+        throw new ApiError(400, "Content is Required")
+    }
+
+    if (!UserId || !tweetId) {
+        throw new ApiError(400, "Both the user and tweet are neccessary")
+    }
+
+    const createdComment = await Comment.create({
+        content: Content,
+        tweet: tweetId,
         owner: UserId
     })
 
@@ -77,7 +109,7 @@ const updateComment = asyncHandler(async (req, res) => {
     }
 
     comment.content = Content
-    await comment.save({ validateBeforesave: false })
+    await comment.save({ validateBeforeSave: false })
 
     return res.status(200)
         .json(
@@ -142,11 +174,36 @@ const getVideoComments = asyncHandler(async (req, res) => {
         )
 })
 
+const getTweetComments = asyncHandler(async (req, res) => {
+    const { tweetId } = req.params
+
+    if (!tweetId) {
+        throw new ApiError(400, "Tweet Is required")
+    }
+
+    const comments = await Comment.find({ tweet: tweetId }).populate("owner", "username avatar fullName")
+
+    if (!comments) {
+        throw new ApiError(400, "Failed to fetch comments")
+    }
+
+    return res.status(200)
+        .json(
+            new ApiResponse(
+                200,
+                comments,
+                "Comments fetched successfully"
+            )
+        )
+})
+
 
 
 export {
     addComment,
     updateComment,
     deleteComment,
-    getVideoComments
+    getVideoComments,
+    addCommentOnTweet,
+    getTweetComments
 }

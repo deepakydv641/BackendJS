@@ -4,7 +4,7 @@ import commentsApi from '../api/commentsApi';
 import { toggleCommentLike } from '../api/likesApi';
 import toast from 'react-hot-toast';
 
-export default function CommentSection({ videoId }) {
+export default function CommentSection({ videoId, tweetId }) {
     const { user } = useAuth();
     const [comments, setComments] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -18,8 +18,15 @@ export default function CommentSection({ videoId }) {
 
     const fetchComments = async () => {
         try {
-            const { data } = await commentsApi.getVideoComments(videoId);
-            setComments(data.data || []);
+            let data;
+            if (videoId) {
+                const response = await commentsApi.getVideoComments(videoId);
+                data = response.data;
+            } else if (tweetId) {
+                const response = await commentsApi.getTweetComments(tweetId);
+                data = response.data;
+            }
+            setComments(data?.data || []);
         } catch (error) {
             console.error('Failed to load comments', error);
         } finally {
@@ -28,13 +35,13 @@ export default function CommentSection({ videoId }) {
     };
 
     useEffect(() => {
-        if (videoId) fetchComments();
+        if (videoId || tweetId) fetchComments();
         
         // Close menu when clicking outside
         const handleClickOutside = () => setActiveMenuId(null);
         document.addEventListener('click', handleClickOutside);
         return () => document.removeEventListener('click', handleClickOutside);
-    }, [videoId]);
+    }, [videoId, tweetId]);
 
     const handleAddComment = async (e) => {
         e.preventDefault();
@@ -50,14 +57,19 @@ export default function CommentSection({ videoId }) {
         setSubmitting(true);
 
         try {
-            await commentsApi.addComment(videoId, newComment);
+            if (videoId) {
+                await commentsApi.addComment(videoId, tempComment);
+            } else if (tweetId) {
+                await commentsApi.addCommentOnTweet(tweetId, tempComment);
+            }
             setNewComment('');
             setIsInputFocused(false);
             
             await fetchComments();
             toast.success('Comment added');
         } catch (error) {
-            toast.error('Failed to add comment');
+            console.error("Comment Add Error:", error.response?.data || error.message);
+            toast.error(error.response?.data?.message || 'Failed to add comment');
         } finally {
             setSubmitting(false);
         }

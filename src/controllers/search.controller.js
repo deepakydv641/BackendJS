@@ -7,7 +7,7 @@ import { User } from "../models/user.model.js"
 import { Subscription } from "../models/subscription.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-console.log("Registering Search controller");
+
 
 const getSearchedVideos = asyncHandler(async (req, res) => {
 

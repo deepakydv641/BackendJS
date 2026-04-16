@@ -58,9 +58,19 @@ export const deleteComment = (commentId) => {
     return commentsApi.delete(`/c/${commentId}`);
 };
 
+export const getTweetComments = (tweetId) => {
+    return commentsApi.get(`/t/${tweetId}`);
+};
+
+export const addCommentOnTweet = (tweetId, content) => {
+    return commentsApi.post(`/t/${tweetId}`, { Content: content });
+};
+
 export default {
     getVideoComments,
     addComment,
     updateComment,
-    deleteComment
+    deleteComment,
+    getTweetComments,
+    addCommentOnTweet
 };

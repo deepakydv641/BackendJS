@@ -6,7 +6,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 
-console.log("Registering user controller");
+
 
 // Helper function to generate access and refresh tokens and save refresh token to DB
 const generateAccessAndRefreshToken = async (userId) => {

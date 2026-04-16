@@ -5,7 +5,7 @@ import { Video } from "../models/video.model.js"
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 
-console.log("Registering video controller");
+
 
 
 const uploadVideo = asyncHandler(async (req, res) => {

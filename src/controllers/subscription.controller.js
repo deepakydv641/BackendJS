@@ -6,8 +6,9 @@ import { Video } from "../models/video.model.js"
 import { User } from "../models/user.model.js"
 import { Subscription } from "../models/subscription.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import { sendMail } from "./mailer.controller.js";
 
-console.log("Registering Subscription controller");
+
 
 const getSubscribers = asyncHandler(async (req, res) => {
     const { userId } = req.params
@@ -123,8 +124,17 @@ const toggleSubscription = asyncHandler(async (req, res) => {
             { channel: channelId }
         ]
     })
-
+    const user = await User.findById(channelId)
+    const subscriber = await User.findById(userId)
+    if (!user || !subscriber) {
+        throw new ApiError(400, "Failed to fetch the channel")
+    }
     if (alreadySubscribed) {
+        await sendMail(
+            user.email,
+            `${subscriber.username} left your channel`,
+            `${subscriber.username} is no longer following your content.`
+        )
         await Subscription.findByIdAndDelete(alreadySubscribed._id)
         return res.status(200)
             .json(new ApiResponse(
@@ -138,11 +148,14 @@ const toggleSubscription = asyncHandler(async (req, res) => {
         subscriber: userId,
         channel: channelId
     })
-
     if (!createdSubscription) {
         throw new ApiError(400, "Failed To Subscribe")
     }
-
+    await sendMail(
+        user.email,
+        `${subscriber.username} subscribes to your channel`,
+        `You have a new subscriber: ${subscriber.username}`
+    )
     return res.status(200)
         .json(
             new ApiResponse(

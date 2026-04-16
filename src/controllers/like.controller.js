@@ -8,7 +8,7 @@ import { Like } from "../models/like.model.js"
 import { Comment } from "../models/comment.model.js";
 import { Tweet } from "../models/tweet.model.js";
 
-console.log("Registering Like controller");
+
 
 const toggleVideoLike = asyncHandler(async (req, res) => {
     const { videoId } = req.params
@@ -168,7 +168,7 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         throw new ApiError(400, "User Should be loggged In")
     }
 
-    const videoList = await Like.find({ 
+    const videoList = await Like.find({
         likedBy: UserId,
         video: { $exists: true }
     }).populate(

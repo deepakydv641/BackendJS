@@ -7,10 +7,10 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js"
 import { Comment } from "../models/comment.model.js";
 import { Tweet } from "../models/tweet.model.js";
-import client from "../db/redis.js";
+import { redisSet, redisGet } from "../db/redis.js";
 import { sendMail } from "./mailer.controller.js";
 
-console.log("Registering forgot password controller");
+
 
 const generateOtp = () => {
     return Math.floor(100000 + Math.random() * 900000).toString();
@@ -23,23 +23,31 @@ const forgotPassword = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You missed email")
     }
 
+    console.log('🔍 [FORGOT PASSWORD] Looking for user with email:', emailId);
     const userExist = await User.findOne({ email: emailId })
 
     if (!userExist) {
+        console.log('❌ [ERROR] User not found for email:', emailId);
         throw new ApiError(400, "User not found")
     }
+
+    console.log('✅ [FORGOT PASSWORD] User found:', userExist.username || userExist.email);
 
     const otp = generateOtp();
     console.log(`\n🔑 [DEV ONLY] Generated OTP for ${emailId}: ${otp}\n`);
 
-    await client.set(`otp:${emailId}`, otp, { EX: 300 })
-
     try {
+        console.log('🔍 [FORGOT PASSWORD] Storing OTP in Redis...');
+        await redisSet(`otp:${emailId}`, otp, { EX: 300 })
+        console.log('✅ [FORGOT PASSWORD] OTP stored in Redis successfully');
+
+        console.log('📧 [FORGOT PASSWORD] Attempting to send email to:', userExist.email);
         await sendMail(
             userExist.email,
             "Your OTP Code",
             `Your OTP is: ${otp}. It expires in 5 minutes.`
         );
+        console.log('✅ [FORGOT PASSWORD] Email sent successfully!');
 
         return res.status(200)
             .json(
@@ -50,18 +58,20 @@ const forgotPassword = asyncHandler(async (req, res) => {
                 )
             )
     } catch (error) {
-        console.error("Mail error:", error);
+        console.log('❌ [FORGOT PASSWORD] Email sending failed');
+        console.log('❌ [ERROR] Details:', error.message);
+        console.log('❌ [ERROR] Full error:', error);
+        console.log('❌ [ERROR] Stack:', error.stack);
+
         return res.status(500)
             .json(
                 new ApiResponse(
                     500,
-                    { reason: error.message },   // expose real error for debugging
+                    { reason: error.message },
                     "Failed to send OTP: " + error.message
                 )
             )
     }
-
-
 })
 
 const otpValidation = asyncHandler(async (req, res) => {
@@ -71,7 +81,7 @@ const otpValidation = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Missing OTP or email")
     }
 
-    const otpFromRedis = await client.get(`otp:${emailId}`)
+    const otpFromRedis = await redisGet(`otp:${emailId}`)
 
     if (!otpFromRedis) {
         throw new ApiError(400, "Something Went Wrong")
@@ -99,23 +109,23 @@ const resetPassword = asyncHandler(
             throw new ApiError(400, "please enter all details")
         }
 
-        const UserExists = await User.findOne({email:emailId});
+        const UserExists = await User.findOne({ email: emailId });
 
-        if(!UserExists){
+        if (!UserExists) {
             throw new ApiError(400, "email is not correct")
         }
 
-        UserExists.password=newpassword;
+        UserExists.password = newpassword;
         await UserExists.save({ validateBeforeSave: true })
 
         return res.status(200)
-        .json(
-            new ApiResponse(
-                200,
-                {},
-                "Password Change Successfully!"
+            .json(
+                new ApiResponse(
+                    200,
+                    {},
+                    "Password Change Successfully!"
+                )
             )
-        )
     }
 )
 

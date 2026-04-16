@@ -8,9 +8,11 @@ dotenv.config({
 
 import ConnectDB from "./db/index.js";
 import app from "./app.js";
+import { initElastic } from "./db/elasticsearch.js";
 
 ConnectDB()
     .then(() => {
+        initElastic();
         app.on("error", (error) => {
             console.log("App error:", error)
             throw error

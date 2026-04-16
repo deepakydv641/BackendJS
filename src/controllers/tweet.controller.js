@@ -8,7 +8,7 @@ import { Subscription } from "../models/subscription.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Tweet } from "../models/tweet.model.js";
 
-console.log("Registering tweet controller");
+
 
 // steps:
 // 1). get the content from the user from req.body 
