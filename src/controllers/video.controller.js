@@ -4,7 +4,7 @@ import { ApiResponse } from "../utils/apiResponse.js";
 import { Video } from "../models/video.model.js"
 import { User } from "../models/user.model.js"
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
-
+import client from "../utils/elasticsearch.js";
 
 
 
@@ -58,6 +58,19 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
     if (!createdVideo) {
         throw new ApiError(500, "Failed to create video")
+    }
+
+    try {
+        await client.index({
+            index: "videos",
+            document: {
+                title: createdVideo.title,
+                description: createdVideo.description,
+                owner: createdVideo.owner
+            }
+        });
+    } catch (error) {
+        console.log(error)
     }
 
     return res.status(201).json(

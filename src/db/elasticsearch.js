@@ -12,7 +12,7 @@ export const initElastic = async () => {
             index: indexName,
             mappings: {
                 properties: {
-                    title: { type: "text" },
+                    title: { type: "search_as_you_type" },
                     description: { type: "text" },
                     tags: { type: "text" },
                     creator: { type: "keyword" }

@@ -11,8 +11,8 @@ import app from "./app.js";
 import { initElastic } from "./db/elasticsearch.js";
 
 ConnectDB()
-    .then(() => {
-        initElastic();
+    .then(async () => {
+        await initElastic();
         app.on("error", (error) => {
             console.log("App error:", error)
             throw error

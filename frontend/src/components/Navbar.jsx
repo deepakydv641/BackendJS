@@ -1,7 +1,8 @@
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import toast from 'react-hot-toast';
+import axios from 'axios';
 
 const navLinks = [
   {
@@ -22,6 +23,20 @@ const navLinks = [
   },
 ];
 
+// Highlights the matching query portion inside a suggestion title
+function highlightMatch(title, query) {
+  if (!query.trim()) return title;
+  const idx = title.toLowerCase().indexOf(query.toLowerCase());
+  if (idx === -1) return title;
+  return (
+    <>
+      {title.slice(0, idx)}
+      <strong style={{ color: '#c084fc', fontWeight: 600 }}>{title.slice(idx, idx + query.length)}</strong>
+      {title.slice(idx + query.length)}
+    </>
+  );
+}
+
 export default function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -29,24 +44,94 @@ export default function Navbar() {
   const [scrolled, setScrolled] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
   const menuRef = useRef(null);
+  const searchRef = useRef(null);
+  const debounceTimer = useRef(null);
+
+  // ── Debounced autocomplete fetch ────────────────────────────────────
+  const fetchSuggestions = useCallback(async (q) => {
+    if (!q.trim()) { setSuggestions([]); setShowSuggestions(false); return; }
+    setLoadingSuggestions(true);
+    try {
+      const token = localStorage.getItem('accessToken');
+      const res = await axios.get(
+        `http://localhost:8000/api/v1/search/search?q=${encodeURIComponent(q)}`,
+        { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
+      );
+      const hits = Array.isArray(res.data) ? res.data : [];
+      // Extract unique titles (up to 7)
+      const titles = [...new Set(hits.map(v => v.title))].slice(0, 7);
+      setSuggestions(titles);
+      setShowSuggestions(titles.length > 0);
+      setActiveIndex(-1);
+    } catch {
+      setSuggestions([]);
+      setShowSuggestions(false);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  }, []);
+
+  const handleInputChange = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    clearTimeout(debounceTimer.current);
+    debounceTimer.current = setTimeout(() => fetchSuggestions(val), 300);
+  };
+
+  const commitSearch = (term) => {
+    const q = (term ?? searchQuery).trim();
+    if (!q) return;
+    setSuggestions([]);
+    setShowSuggestions(false);
+    setActiveIndex(-1);
+    setSearchQuery('');
+    navigate(`/search/${encodeURIComponent(q)}`);
+  };
 
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search/${encodeURIComponent(searchQuery.trim())}`);
-      setSearchQuery('');
+    commitSearch();
+  };
+
+  // Keyboard navigation inside the suggestions dropdown
+  const handleKeyDown = (e) => {
+    if (!showSuggestions || suggestions.length === 0) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setActiveIndex(i => Math.min(i + 1, suggestions.length - 1));
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setActiveIndex(i => Math.max(i - 1, -1));
+    } else if (e.key === 'Enter' && activeIndex >= 0) {
+      e.preventDefault();
+      commitSearch(suggestions[activeIndex]);
+    } else if (e.key === 'Escape') {
+      setShowSuggestions(false);
+      setActiveIndex(-1);
     }
   };
 
+  // ── Scroll listener ─────────────────────────────────────────────────
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener('scroll', onScroll, { passive: true });
     return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
+  // ── Click-outside: close user menu + suggestions dropdown ───────────
   useEffect(() => {
-    const handler = (e) => { if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false); };
+    const handler = (e) => {
+      if (menuRef.current && !menuRef.current.contains(e.target)) setMenuOpen(false);
+      if (searchRef.current && !searchRef.current.contains(e.target)) {
+        setShowSuggestions(false);
+        setActiveIndex(-1);
+      }
+    };
     document.addEventListener('mousedown', handler);
     return () => document.removeEventListener('mousedown', handler);
   }, []);
@@ -102,20 +187,84 @@ export default function Navbar() {
         {/* Center Nav Links & Search */}
         {user && (
           <div className="hidden sm:flex flex-1 items-center justify-center gap-4 max-w-xl mx-4">
-            <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-full p-1 w-full max-w-md">
-              <form onSubmit={handleSearch} className="flex-1 flex items-center bg-transparent px-3">
-                <svg className="w-4 h-4 text-white/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <input
-                  type="text"
-                  placeholder="Search videos..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full bg-transparent border-none text-sm text-white placeholder-white/40 focus:outline-none focus:ring-0 px-3 py-1.5"
-                />
-                <button type="submit" className="sr-only">Search</button>
-              </form>
+            {/* Search wrapper — relative so dropdown positions correctly */}
+            <div className="relative w-full max-w-md" ref={searchRef}>
+              <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-full p-1 w-full transition-all duration-200"
+                style={showSuggestions ? { borderColor: 'rgba(168,85,247,0.40)', boxShadow: '0 0 0 3px rgba(168,85,247,0.10)' } : {}}
+              >
+                <form onSubmit={handleSearch} className="flex-1 flex items-center bg-transparent px-3">
+                  {loadingSuggestions ? (
+                    <svg className="w-4 h-4 text-violet-400 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                    </svg>
+                  ) : (
+                    <svg className="w-4 h-4 text-white/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                  )}
+                  <input
+                    id="navbar-search-input"
+                    type="text"
+                    placeholder="Search videos..."
+                    value={searchQuery}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
+                    autoComplete="off"
+                    className="w-full bg-transparent border-none text-sm text-white placeholder-white/40 focus:outline-none focus:ring-0 px-3 py-1.5"
+                  />
+                  <button type="submit" className="sr-only">Search</button>
+                </form>
+              </div>
+
+              {/* ── Autocomplete Dropdown ── */}
+              {showSuggestions && suggestions.length > 0 && (
+                <div
+                  className="absolute left-0 right-0 top-full mt-2 rounded-2xl overflow-hidden z-50 animate-scale-in"
+                  style={{
+                    background: 'rgba(22,17,43,0.97)',
+                    border: '1px solid rgba(168,85,247,0.20)',
+                    boxShadow: '0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(168,85,247,0.08)',
+                    backdropFilter: 'blur(20px)',
+                    WebkitBackdropFilter: 'blur(20px)',
+                  }}
+                >
+                  <ul role="listbox" className="py-1.5">
+                    {suggestions.map((title, idx) => (
+                      <li
+                        key={idx}
+                        role="option"
+                        aria-selected={idx === activeIndex}
+                        onMouseEnter={() => setActiveIndex(idx)}
+                        onMouseLeave={() => setActiveIndex(-1)}
+                        onMouseDown={(e) => { e.preventDefault(); commitSearch(title); }}
+                        className="flex items-center gap-3 px-4 py-2.5 cursor-pointer transition-colors duration-100"
+                        style={{
+                          background: idx === activeIndex ? 'rgba(168,85,247,0.14)' : 'transparent',
+                          color: idx === activeIndex ? '#e9d5ff' : '#94a3b8',
+                        }}
+                      >
+                        <svg className="w-3.5 h-3.5 shrink-0 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        <span className="text-sm truncate">{highlightMatch(title, searchQuery)}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <div
+                    className="px-4 py-2 border-t text-xs flex items-center gap-1.5"
+                    style={{ borderColor: 'rgba(255,255,255,0.06)', color: 'var(--text-muted)' }}
+                  >
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)' }}>↑↓</kbd>
+                    navigate &nbsp;
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)' }}>↵</kbd>
+                    select &nbsp;
+                    <kbd className="px-1.5 py-0.5 rounded text-[10px]" style={{ background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.10)' }}>Esc</kbd>
+                    close
+                  </div>
+                </div>
+              )}
             </div>
             <div className="flex items-center gap-1">
               {navLinks.map(({ to, label, icon }) => {

@@ -2,19 +2,22 @@ import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import Navbar from '../components/Navbar';
-import VideoCard from '../components/VideoCard';
+import SearchVideoCard from '../components/SearchVideoCard';
 import toast from 'react-hot-toast';
 
 function VideoCardSkeleton() {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="skeleton aspect-video rounded-2xl" />
-      <div className="flex gap-3 px-1">
-        <div className="skeleton w-9 h-9 rounded-xl shrink-0" />
-        <div className="flex flex-col gap-2 flex-1 pt-1">
-          <div className="skeleton h-3 w-full rounded" />
-          <div className="skeleton h-3 w-2/3 rounded" />
+    <div className="flex flex-col sm:flex-row gap-4 w-full animate-pulse">
+      <div className="w-full sm:w-[360px] md:w-[400px] lg:w-[450px] aspect-video rounded-xl skeleton shrink-0" />
+      <div className="flex flex-col gap-2 flex-1 pt-2">
+        <div className="skeleton h-5 w-3/4 rounded" />
+        <div className="skeleton h-3 w-1/4 rounded mt-1" />
+        <div className="flex items-center gap-2 mt-4">
+          <div className="skeleton w-6 h-6 rounded-full" />
+          <div className="skeleton h-3 w-32 rounded" />
         </div>
+        <div className="skeleton h-3 w-full rounded mt-3" />
+        <div className="skeleton h-3 w-4/5 rounded" />
       </div>
     </div>
   );
@@ -30,11 +33,11 @@ export default function SearchPage() {
       setLoading(true);
       try {
         const token = localStorage.getItem('accessToken');
-        const res = await axios.get(`http://localhost:8000/api/v1/search/${encodeURIComponent(query)}`, { 
+        const res = await axios.get(`http://localhost:8000/api/v1/search/search?q=${encodeURIComponent(query)}`, { 
             withCredentials: true,
             headers: token ? { Authorization: `Bearer ${token}` } : {}
         });
-        setVideos(res.data?.data || []);
+        setVideos(Array.isArray(res.data) ? res.data : []);
       } catch (error) {
         console.error("Search error:", error);
         toast.error('Failed to fetch search results');
@@ -56,29 +59,30 @@ export default function SearchPage() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-slide-up">
 
         {/* Header */}
-        <div className="mb-10">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2">
+        <div className="mb-10 border-b pb-6" style={{ borderColor: 'rgba(255,255,255,0.1)' }}>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-white mb-2" style={{ fontFamily: 'sans-serif' }}>
             Search results for "{query}"
           </h1>
           <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-            Found {loading ? '...' : videos.length} videos matching your search
+            Found {loading ? '...' : videos.length} matching videos
           </p>
         </div>
 
-        {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8 pb-12">
-            {Array.from({ length: 8 }).map((_, i) => <VideoCardSkeleton key={i} />)}
-          </div>
-        ) : videos.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-5 gap-y-8 pb-12">
-            {videos.map((video, i) => (
-              <div key={video._id} style={{ animationDelay: `${i * 0.05}s` }}>
-                <VideoCard video={video} />
-              </div>
-            ))}
-          </div>
-        ) : (
+        {/* Results List */}
+        <div className="w-full max-w-5xl">
+          {loading ? (
+            <div className="flex flex-col gap-6 pb-12">
+              {Array.from({ length: 5 }).map((_, i) => (
+                 <VideoCardSkeleton key={i} />
+              ))}
+            </div>
+          ) : videos.length > 0 ? (
+            <div className="flex flex-col gap-5 sm:gap-6 lg:gap-8 pb-12">
+              {videos.map((video, i) => (
+                <SearchVideoCard key={video._id} video={video} />
+              ))}
+            </div>
+          ) : (
           /* Empty State */
           <div className="flex flex-col items-center justify-center py-20 text-center rounded-3xl" style={{ background: 'var(--surface-2)' }}>
             <div
@@ -98,6 +102,7 @@ export default function SearchPage() {
             </p>
           </div>
         )}
+        </div>
       </div>
     </div>
   );

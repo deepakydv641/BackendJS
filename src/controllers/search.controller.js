@@ -6,40 +6,40 @@ import { Video } from "../models/video.model.js"
 import { User } from "../models/user.model.js"
 import { Subscription } from "../models/subscription.model.js";
 import { uploadOnCloudinary } from "../utils/cloudinary.js";
+import client from "../utils/elasticsearch.js";
 
+export const getSearchedVideos = async (req, res) => {
+    const { q } = req.query;
 
-
-const getSearchedVideos = asyncHandler(async (req, res) => {
-
-    // GET requests send data in the URL path, not the body!
-    const { content } = req.params;
-
-    if (!content) {
-        throw new ApiError(400, "Search query is required")
+    if (!q) {
+        return res.json([]);
     }
 
-    const list = await Video.find({
-        $or: [
-            { title: { $regex: content, $options: "i" } },
-            { description: { $regex: content, $options: "i" } }
-        ]
-    }).populate("owner", "username avatar fullName")
+    const result = await client.search({
+        index: "videos",
+        query: {
+            multi_match: {
+                query: q,
+                type: "bool_prefix",
+                fields: [
+                    "title",
+                    "title._2gram",
+                    "title._3gram"
+                ]
+            }
+        }
+    });
 
-    if (!list) {
-        throw new ApiError(400, "Failed to fetch videos")
-    }
+    const matchedTitles = result.hits.hits.map(hit => hit._source.title);
 
-    return res.status(200)
-        .json(
-            new ApiResponse(
-                200,
-                list,
-                "Videos fetched successfully"
-            )
-        )
+    const unorderedVideos = await Video.find({
+        title: { $in: matchedTitles }
+    }).populate("owner", "username avatar fullName createdAt");
 
-})
+    // Preserve Elasticsearch's relevance sorting order
+    const videos = matchedTitles.map(title =>
+        unorderedVideos.find(v => v.title === title)
+    ).filter(Boolean);
 
-export {
-    getSearchedVideos
-}
+    res.json(videos);
+};
