@@ -12,7 +12,9 @@ import { initElastic } from "./db/elasticsearch.js";
 
 ConnectDB()
     .then(async () => {
-        await initElastic();
+        if (process.env.NODE_ENV === "production") {
+            await initElastic();
+        }
         app.on("error", (error) => {
             console.log("App error:", error)
             throw error
