@@ -63,6 +63,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
     try {
         await client.index({
             index: "videos",
+            id: createdVideo._id.toString(),
             document: {
                 title: createdVideo.title,
                 description: createdVideo.description,
@@ -141,6 +142,19 @@ const updateVideoDetails = asyncHandler(async (req, res) => {
 
     await video.save({ validateBeforesave: false })
 
+    try {
+        await client.update({
+            index: "videos",
+            id: video._id.toString(),
+            doc: {
+                ...(title && { title }),
+                ...(description && { description })
+            }
+        });
+    } catch (error) {
+        console.log("Elasticsearch update failed:", error);
+    }
+
     return res.status(200)
         .json(
             new ApiResponse(
@@ -197,6 +211,15 @@ const deleteVideo = asyncHandler(async (req, res) => {
 
     // FIX 3: Correctly delete the document using findByIdAndDelete
     await Video.findByIdAndDelete(videoId)
+
+    try {
+        await client.delete({
+            index: "videos",
+            id: videoId
+        });
+    } catch (error) {
+        console.log("Elasticsearch delete failed:", error);
+    }
 
     // TODO: Ideally, you should also delete the video and thumbnail from Cloudinary here
     // using video.videoFile and video.thumbnail URLs to save storage space.

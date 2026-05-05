@@ -12,7 +12,11 @@ import { initElastic } from "./db/elasticsearch.js";
 
 ConnectDB()
     .then(async () => {
-        await initElastic();
+        try {
+            await initElastic();
+        } catch (err) {
+            console.error("❌ Elasticsearch init failed (server will still start):", err.message);
+        }
         app.on("error", (error) => {
             console.log("App error:", error)
             throw error

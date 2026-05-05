@@ -3,25 +3,34 @@
 import client from "../utils/elasticsearch.js";
 
 export const initElastic = async () => {
-    const indexName = "videos";
+    if (!process.env.CLOUD_ID || !process.env.ELASTIC_API_KEY) {
+        console.warn("⚠️  Elasticsearch credentials not set (CLOUD_ID or ELASTIC_API_KEY) — skipping Elasticsearch init");
+        return;
+    }
 
-    const exists = await client.indices.exists({ index: indexName });
+    try {
+        const indexName = "videos";
 
-    if (!exists) {
-        await client.indices.create({
-            index: indexName,
-            mappings: {
-                properties: {
-                    title: { type: "search_as_you_type" },
-                    description: { type: "text" },
-                    tags: { type: "text" },
-                    creator: { type: "keyword" }
+        const exists = await client.indices.exists({ index: indexName });
+
+        if (!exists) {
+            await client.indices.create({
+                index: indexName,
+                mappings: {
+                    properties: {
+                        title: { type: "search_as_you_type" },
+                        description: { type: "text" },
+                        tags: { type: "text" },
+                        creator: { type: "keyword" }
+                    }
                 }
-            }
-        });
+            });
 
-        console.log("✅ Elasticsearch index created");
-    } else {
-        console.log("ℹ️ Index already exists");
+            console.log("✅ Elasticsearch index created");
+        } else {
+            console.log("ℹ️ Elasticsearch index already exists");
+        }
+    } catch (err) {
+        console.error("❌ Elasticsearch init failed (server will still start):", err.message);
     }
 };

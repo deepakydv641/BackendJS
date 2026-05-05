@@ -1,7 +1,12 @@
 import { Client } from '@elastic/elasticsearch';
 
 const client = new Client({
-    node: 'http://localhost:9200',
+    cloud: {
+        id: process.env.CLOUD_ID
+    },
+    auth: {
+        apiKey: process.env.ELASTIC_API_KEY
+    }
 });
 
-export default client;
+export default client;  
