@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const forgotPasswordApi = axios.create({
-  baseURL: 'http://localhost:8000/api/v1/users',
+  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/users',
   withCredentials: true,
 });
 

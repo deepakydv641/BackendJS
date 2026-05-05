@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'http://localhost:8000/api/v1/users',
+  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/users',
   withCredentials: true, // send cookies with every request
 });
 
@@ -23,7 +23,7 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          'http://localhost:8000/api/v1/users/refresh-access-token',
+          'https://vidstream-th0g.onrender.com/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

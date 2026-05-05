@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const tweetsApi = axios.create({
-  baseURL: 'http://localhost:8000/api/v1/tweets',
+  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/tweets',
   withCredentials: true,
 });
 
@@ -18,7 +18,7 @@ tweetsApi.interceptors.response.use(
     if (error.response?.status === 401 && !original._retry) {
       original._retry = true;
       try {
-        const { data } = await axios.post('http://localhost:8000/api/v1/users/refresh-access-token', {}, { withCredentials: true });
+        const { data } = await axios.post('https://vidstream-th0g.onrender.com/api/v1/users/refresh-access-token', {}, { withCredentials: true });
         const newToken = data.data?.accessToken;
         if (newToken) {
           localStorage.setItem('accessToken', newToken);

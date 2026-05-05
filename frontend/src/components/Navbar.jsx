@@ -59,7 +59,7 @@ export default function Navbar() {
     try {
       const token = localStorage.getItem('accessToken');
       const res = await axios.get(
-        `http://localhost:8000/api/v1/search/search?q=${encodeURIComponent(q)}`,
+        `https://vidstream-th0g.onrender.com/api/v1/search/search?q=${encodeURIComponent(q)}`,
         { withCredentials: true, headers: token ? { Authorization: `Bearer ${token}` } : {} }
       );
       const hits = Array.isArray(res.data) ? res.data : [];

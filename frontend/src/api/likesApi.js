@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const likesApi = axios.create({
-  baseURL: 'http://localhost:8000/api/v1/likes',
+  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/likes',
   withCredentials: true,
 });
 
@@ -21,7 +21,7 @@ likesApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          'http://localhost:8000/api/v1/users/refresh-access-token',
+          'https://vidstream-th0g.onrender.com/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );
