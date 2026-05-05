@@ -12,8 +12,26 @@ import downloadRouter from './routes/download.routes.js';
 
 const app = express();
 
+const allowedOrigins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "https://vid-stream-psxf.vercel.app"
+];
+
 app.use(cors({
-    origin: process.env.CORS_ORIGIN === "*" ? true : process.env.CORS_ORIGIN || true,
+    origin: function (origin, callback) {
+        // Allow requests with no origin (like Postman or curl) or if origin is in the allowed list
+        if (!origin || allowedOrigins.includes(origin)) {
+            callback(null, true);
+        } else {
+            // Also fallback to CORS_ORIGIN from env if it exists and matches
+            if (process.env.CORS_ORIGIN === "*" || process.env.CORS_ORIGIN === origin) {
+                 callback(null, true);
+            } else {
+                 callback(new Error('Not allowed by CORS'));
+            }
+        }
+    },
     credentials: true
 }))
 
