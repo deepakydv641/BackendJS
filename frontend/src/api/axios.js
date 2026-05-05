@@ -1,8 +1,9 @@
 import axios from 'axios';
 
 const api = axios.create({
-  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/users',
+  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users',
   withCredentials: true, // send cookies with every request
+  timeout: 120000, // 2 minutes to allow Render free tier to wake up
 });
 
 // Attach access token from localStorage if present
@@ -23,7 +24,7 @@ api.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          'https://vidstream-th0g.onrender.com/api/v1/users/refresh-access-token',
+          (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

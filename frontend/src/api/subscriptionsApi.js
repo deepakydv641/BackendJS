@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const subscriptionsApi = axios.create({
-  baseURL: 'https://vidstream-th0g.onrender.com/api/v1/subscriptions',
+  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/subscriptions',
   withCredentials: true,
 });
 
@@ -23,7 +23,7 @@ subscriptionsApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          'https://vidstream-th0g.onrender.com/api/v1/users/refresh-access-token',
+          (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

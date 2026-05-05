@@ -33,7 +33,7 @@ export default function SearchPage() {
       setLoading(true);
       try {
         const token = localStorage.getItem('accessToken');
-        const res = await axios.get(`https://vidstream-th0g.onrender.com/api/v1/search/search?q=${encodeURIComponent(query)}`, { 
+        const res = await axios.get(`\${import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com'}/api/v1/search/search?q=${encodeURIComponent(query)}`, { 
             withCredentials: true,
             headers: token ? { Authorization: `Bearer ${token}` } : {}
         });

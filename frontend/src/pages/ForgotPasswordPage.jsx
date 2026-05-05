@@ -75,15 +75,27 @@ export default function ForgotPasswordPage() {
 
   // ── Step 1: Send OTP ──────────────────────────────────────────
   const handleSendOtp = async (e) => {
-    e.preventDefault();
+    if (e) e.preventDefault();
     setLoading(true);
+    
+    // Alert the user if the free tier server takes a long time to wake up
+    const wakeUpToast = setTimeout(() => {
+      toast('Our free server is waking up... this could take up to 60 seconds. Please do not close the page! ☕', {
+        icon: '⏳',
+        duration: 8000,
+      });
+    }, 5000);
+
     try {
       await sendForgotPasswordOtp(email);
+      clearTimeout(wakeUpToast);
       toast.success('OTP sent to your email! Check your inbox 📬');
       setStep(1);
     } catch (err) {
+      clearTimeout(wakeUpToast);
       toast.error(err.response?.data?.message || 'Failed to send OTP');
     } finally {
+      clearTimeout(wakeUpToast);
       setLoading(false);
     }
   };
