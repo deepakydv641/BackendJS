@@ -35,7 +35,6 @@ export default function UpdateAccountPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#09090b] relative">
-      <Navbar />
       
       <div className="max-w-md mx-auto px-4 py-16 relative z-10 animate-slide-up">
         <div className="mb-8 text-center">

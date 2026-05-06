@@ -24,7 +24,6 @@ const downloadVideo = asyncHandler(async (req, res) => {
     if (video.public_id) {
         downloadUrl = cloudinary.v2.url(video.public_id, {
             resource_type: "video",
-            format: "mp4",
             flags: "attachment"
         });
     } else {

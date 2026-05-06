@@ -108,7 +108,6 @@ export default function HomePage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
-      <Navbar />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-slide-up">
 
@@ -145,18 +144,27 @@ export default function HomePage() {
         </div>
 
         {/* Tab Switcher */}
-        <div className="flex items-center gap-1 mb-8 p-1 rounded-xl w-fit" style={{ background: 'var(--surface-2)', border: '1px solid var(--border-subtle)' }}>
+        <div className="flex items-center gap-2 mb-8 w-fit">
           {tabs.map(tab => (
             <button
               key={tab.key}
               onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-5 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${activeTab === tab.key ? 'text-white shadow-md' : 'hover:text-white'}`}
-              style={activeTab === tab.key ? { background: 'linear-gradient(135deg,#e50914,#f43f5e)', color: 'var(--text-muted)' } : { color: 'var(--text-muted)' }}
+              className={`flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold transition-all duration-200 border ${
+                activeTab === tab.key 
+                ? 'border-transparent shadow-md' 
+                : 'border-[var(--border-subtle)] hover:bg-black/5'
+              }`}
+              style={{
+                background: activeTab === tab.key ? 'var(--sidebar-bg)' : 'var(--surface-3)',
+                color: activeTab === tab.key ? 'white' : 'var(--text-muted)'
+              }}
             >
               {tab.icon}
               {tab.label}
               {tab.key === 'community' && tweets.length > 0 && (
-                <span className="ml-1 text-xs bg-white/20 px-1.5 py-0.5 rounded-full font-bold">{tweets.length}</span>
+                <span className={`ml-1 text-xs px-1.5 py-0.5 rounded-full font-bold ${activeTab === tab.key ? 'bg-white/20' : 'bg-black/10'}`}>
+                  {tweets.length}
+                </span>
               )}
             </button>
           ))}

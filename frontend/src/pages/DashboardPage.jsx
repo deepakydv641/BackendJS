@@ -119,7 +119,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
-      <Navbar />
 
       {/* Top glow */}
       <div className="fixed top-0 left-0 right-0 h-64 pointer-events-none"

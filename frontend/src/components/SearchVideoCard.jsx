@@ -141,8 +141,8 @@ export default function SearchVideoCard({ video, onDelete }) {
       <div className="relative w-full sm:w-[360px] md:w-[400px] lg:w-[450px] shrink-0 aspect-video rounded-xl overflow-hidden"
            style={{
              background: 'var(--surface-3)',
-             border: '1px solid rgba(255,255,255,0.05)',
-             boxShadow: hovered ? '0 4px 20px rgba(0,0,0,0.5)' : 'none'
+             border: '1px solid var(--border-subtle)',
+             boxShadow: hovered ? '0 8px 30px rgba(0,0,0,0.1), 0 0 0 1px var(--accent-primary)' : '0 2px 12px rgba(0,0,0,0.05)'
            }}>
         <img
           src={video.thumbnail?.replace('http://', 'https://')}
@@ -177,7 +177,8 @@ export default function SearchVideoCard({ video, onDelete }) {
           <div className="relative shrink-0" ref={menuRef}>
             <button 
               onClick={(e) => { e.stopPropagation(); setShowMenu(!showMenu); }}
-              className={`p-1.5 rounded-full hover:bg-white/10 transition-colors ${hovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'} text-white mr-[-8px]`}
+              className={`p-1.5 rounded-full hover:bg-black/5 transition-colors ${hovered ? 'opacity-100' : 'opacity-0 sm:opacity-0'} mr-[-8px]`}
+              style={{ color: 'var(--text-muted)' }}
             >
               <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
                  <path d="M12 8c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2zm0 2c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2zm0 6c-1.1 0-2 .9-2 2s.9 2 2 2 2-.9 2-2-.9-2-2-2z" />
@@ -186,30 +187,32 @@ export default function SearchVideoCard({ video, onDelete }) {
             
             {showMenu && (
               <div className="absolute right-0 top-8 w-40 rounded-xl shadow-xl overflow-hidden z-20 border animate-fade-in"
-                   style={{ background: 'var(--surface-2)', borderColor: 'rgba(255,255,255,0.1)' }}>
+                   style={{ background: 'var(--surface-3)', borderColor: 'var(--border-subtle)' }}>
                 {isOwner && (
                   <>
                     <button
                       onClick={(e) => { e.stopPropagation(); setShowMenu(false); navigate(`/edit-video/${video._id}`, { state: { video } }); }}
-                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 text-white"
+                      className="w-full text-left px-4 py-2.5 text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
+                      style={{ color: 'var(--text-primary)' }}
                     >
                       <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
                       Edit
                     </button>
-                    <div className="w-full h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                    <div className="w-full h-px" style={{ background: 'var(--border-subtle)' }} />
                     <button
                       onClick={handleDelete}
                       disabled={isDeleting}
-                      className="w-full text-left px-4 py-2.5 text-sm text-red-400 hover:bg-white/5 transition-colors flex items-center gap-2"
+                      className="w-full text-left px-4 py-2.5 text-sm text-red-600 hover:bg-black/5 transition-colors flex items-center gap-2"
                     >
                       {isDeleting ? 'Deleting...' : 'Delete'}
                     </button>
-                    <div className="w-full h-px" style={{ background: 'rgba(255,255,255,0.05)' }} />
+                    <div className="w-full h-px" style={{ background: 'var(--border-subtle)' }} />
                   </>
                 )}
                 <button
                   onClick={handleDownload}
-                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-white/5 transition-colors flex items-center gap-2 text-[#a78bfa]"
+                  className="w-full text-left px-4 py-2.5 text-sm hover:bg-black/5 transition-colors flex items-center gap-2"
+                  style={{ color: 'var(--accent-primary)' }}
                 >
                   Download
                 </button>
@@ -223,17 +226,17 @@ export default function SearchVideoCard({ video, onDelete }) {
         </p>
 
         <div className="flex items-center gap-2 mt-4 cursor-default w-fit" onClick={(e) => e.stopPropagation()}>
-          <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-700 cursor-pointer" onClick={() => navigate(`/channel/${video.owner?.username}`)}>
+          <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 cursor-pointer" onClick={() => navigate(`/channel/${video.owner?.username}`)}>
              {video.owner?.avatar ? (
                 <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" />
              ) : (
-                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold bg-[#7c3aed] text-white">
+                <div className="w-full h-full flex items-center justify-center text-[10px] font-bold bg-[var(--brand-primary)] text-white">
                    {(video.owner?.fullName || video.owner?.username || 'U')[0].toUpperCase()}
                 </div>
              )}
           </div>
           <span 
-            className="text-[13px] hover:text-white cursor-pointer transition-colors" 
+            className="text-[13px] hover:text-[var(--accent-primary)] cursor-pointer transition-colors" 
             style={{ color: 'var(--text-muted)' }}
             onClick={() => navigate(`/channel/${video.owner?.username}`)}
           >
@@ -247,7 +250,7 @@ export default function SearchVideoCard({ video, onDelete }) {
               disabled={subLoading}
               className={`text-[10px] uppercase tracking-wider font-semibold px-2 py-0.5 rounded transition-all ml-2
                 ${hovered ? 'opacity-100' : 'opacity-0'} 
-                ${isSubscribed ? 'bg-white/10 text-white/70' : 'bg-[#e50914] text-white hover:bg-[#b91c1c]'}
+                ${isSubscribed ? 'bg-black/5 text-[var(--text-primary)]' : 'bg-[var(--brand-primary)] text-white'}
               `}
             >
               {subLoading ? '...' : isSubscribed ? 'Subscribed' : 'Subscribe'}

@@ -124,7 +124,6 @@ export default function UploadVideoPage() {
       {loading && (
         <div className="progress-bar" style={{ width: `${progress}%` }} />
       )}
-      <Navbar />
 
       <div className="max-w-2xl mx-auto px-4 py-10 animate-slide-up">
         {/* Header */}

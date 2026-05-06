@@ -234,3 +234,15 @@ By switching to Comment.find().populate("owner"), we entirely bypass these stric
 - **Root Cause**: Modern browser security protocols strictly prohibit the `Access-Control-Allow-Origin: *` wildcard when HTTP requests explicitly carry `withCredentials: true` (cookies/authorization headers).
 - **File Affected**: `src/app.js`
 - **Fix**: Overrode the wildcard fallback in `cors(...)` with a custom functional array validation. Explicitly whitelisted specific environments (`"http://localhost:3000"`, `"http://localhost:5173"`, `"https://vid-stream-psxf.vercel.app"`) to correctly return matched strings as the distinct valid Origin header.
+
+## 29. Videos Not Downloading (Missing File Extension)
+- **Context**: Clicking "Download" downloaded the video successfully, but the resulting file had no extension (e.g. `.mp4`), making it unrecognizable by the OS video player.
+- **Root Cause**: The Cloudinary `v2.url` method was generating a URL using just the `public_id` and `resource_type: "video"`. Since `public_id` natively omits the file extension, the generated `fl_attachment` URL lacked `.mp4`.
+- **File Affected**: `src/controllers/download.controller.js`
+- **Fix**: Explicitly added `format: "mp4"` to the `cloudinary.v2.url` options object, ensuring the browser downloads the file with the proper extension.
+
+## 30. Broken Frontend API Routing (Escaped Template Literals)
+- **Context**: The frontend was making API requests that resulted in 404 Not Found errors, with the URL looking like `http://localhost:5173/$%7Bimport.meta.env.MODE...`.
+- **Root Cause**: The string interpolation syntax for the dynamic backend URL (`${import.meta.env.MODE === 'development' ? ... : ...}`) had an escaped backslash (`\${...}`) in multiple files. This caused JS to evaluate it as a literal string rather than an expression.
+- **Files Affected**: `frontend/src/components/VideoCard.jsx`, `frontend/src/components/SearchVideoCard.jsx`, `frontend/src/components/Navbar.jsx`, `frontend/src/pages/SearchPage.jsx`.
+- **Fix**: Removed the leading backslash (`\`) from all instances of the template literal, restoring proper string interpolation for the API base URL.

@@ -28,7 +28,6 @@ export default function LikedVideosPage() {
 
     return (
         <div className="min-h-screen pb-12" style={{ background: 'var(--surface-1)' }}>
-            <Navbar />
             <div className="max-w-7xl mx-auto px-4 sm:px-6 mt-8 animate-fade-in">
                 <div className="mb-8">
                     <h1 className="text-2xl font-bold flex items-center gap-3" style={{ color: 'var(--text-primary)' }}>

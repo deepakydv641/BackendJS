@@ -148,23 +148,17 @@ export default function Navbar() {
 
   return (
     <nav
-      className="sticky top-0 z-50 transition-all duration-300"
+      className="sticky top-0 z-40 transition-all duration-300"
       style={{
-        background: scrolled
-          ? 'rgba(8, 8, 26, 0.85)'
-          : 'rgba(8, 8, 26, 0.5)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        borderBottom: scrolled
-          ? '1px solid rgba(255,255,255,0.08)'
-          : '1px solid transparent',
-        boxShadow: scrolled ? '0 4px 30px rgba(0,0,0,0.3)' : 'none',
+        background: '#4e7268', /* mid-teal between sidebar #11312f and mint #cae6d5 */
+        borderBottom: '1px solid rgba(255,255,255,0.10)',
+        boxShadow: '0 2px 16px rgba(17,49,47,0.18)',
       }}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between gap-4">
 
-        {/* Logo */}
-        <Link to="/home" className="flex items-center gap-2.5 shrink-0 group">
+        {/* Logo (Hidden on desktop because Sidebar has it) */}
+        <Link to="/home" className="flex md:hidden items-center gap-2.5 shrink-0 group">
           <div
             className="w-9 h-9 rounded-xl flex items-center justify-center transition-all duration-300 group-hover:scale-105"
             style={{
@@ -189,9 +183,13 @@ export default function Navbar() {
           <div className="hidden sm:flex flex-1 items-center justify-center gap-4 max-w-xl mx-4">
             {/* Search wrapper — relative so dropdown positions correctly */}
             <div className="relative w-full max-w-md" ref={searchRef}>
-              <div className="flex items-center gap-1 bg-white/[0.03] border border-white/[0.06] rounded-full p-1 w-full transition-all duration-200"
-                style={showSuggestions ? { borderColor: 'rgba(168,85,247,0.40)', boxShadow: '0 0 0 3px rgba(168,85,247,0.10)' } : {}}
-              >
+            <div className="flex items-center gap-1 rounded-full p-1 w-full transition-all duration-200"
+              style={{
+                background: 'rgba(255,255,255,0.12)',
+                border: '1.5px solid rgba(255,255,255,0.20)',
+                ...(showSuggestions ? { borderColor: 'rgba(255,255,255,0.55)', boxShadow: '0 0 0 3px rgba(255,255,255,0.10)' } : {})
+              }}
+            >
                 <form onSubmit={handleSearch} className="flex-1 flex items-center bg-transparent px-3">
                   {loadingSuggestions ? (
                     <svg className="w-4 h-4 text-violet-400 shrink-0 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -199,7 +197,7 @@ export default function Navbar() {
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
                     </svg>
                   ) : (
-                    <svg className="w-4 h-4 text-white/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <svg className="w-4 h-4 shrink-0 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                   )}
@@ -212,7 +210,7 @@ export default function Navbar() {
                     onKeyDown={handleKeyDown}
                     onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
                     autoComplete="off"
-                    className="w-full bg-transparent border-none text-sm text-white placeholder-white/40 focus:outline-none focus:ring-0 px-3 py-1.5"
+                    className="w-full bg-transparent border-none text-sm text-white placeholder-white/50 focus:outline-none focus:ring-0 px-3 py-1.5"
                   />
                   <button type="submit" className="sr-only">Search</button>
                 </form>
@@ -265,21 +263,7 @@ export default function Navbar() {
                   </div>
                 </div>
               )}
-            </div>
-            <div className="flex items-center gap-1">
-              {navLinks.map(({ to, label, icon }) => {
-                const active = pathname.startsWith(to);
-                return (
-                  <Link
-                    key={to}
-                    to={to}
-                    className={`nav-link ${active ? 'active' : ''}`}
-                    title={label}
-                  >
-                    {icon}
-                  </Link>
-                );
-              })}
+              {/* NavLinks removed from TopHeader; they are in Sidebar now */}
             </div>
           </div>
         )}
@@ -291,7 +275,8 @@ export default function Navbar() {
               {/* Upload CTA */}
               <Link
                 to="/upload-video"
-                className="hidden sm:flex items-center gap-2 btn-primary py-2 px-4 text-sm"
+                className="hidden sm:flex items-center gap-2 py-2 px-4 text-sm font-semibold rounded-xl text-white transition-all duration-200 hover:bg-white/20 active:scale-95"
+                style={{ background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)' }}
               >
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -303,17 +288,17 @@ export default function Navbar() {
               <div className="relative" ref={menuRef}>
                 <button
                   onClick={() => setMenuOpen(!menuOpen)}
-                  className="flex items-center gap-2.5 p-1 rounded-xl transition-all duration-200 hover:bg-white/[0.06] group"
+                  className="flex items-center gap-2.5 p-1 rounded-xl transition-all duration-200 hover:bg-white/10 group"
                 >
                   <div
                     className="w-9 h-9 rounded-xl overflow-hidden border-2 transition-all duration-200"
-                    style={{ borderColor: menuOpen ? 'rgba(124,58,237,0.7)' : 'rgba(255,255,255,0.1)' }}
+                    style={{ borderColor: menuOpen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}
                   >
                     <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
                   </div>
                   <svg
-                    className={`w-3.5 h-3.5 transition-transform duration-200 hidden sm:block`}
-                    style={{ color: 'var(--text-muted)', transform: menuOpen ? 'rotate(180deg)' : 'none' }}
+                    className={`w-3.5 h-3.5 transition-transform duration-200 hidden sm:block text-white/70`}
+                    style={{ transform: menuOpen ? 'rotate(180deg)' : 'none' }}
                     fill="none" viewBox="0 0 24 24" stroke="currentColor"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7"/>
@@ -326,12 +311,12 @@ export default function Navbar() {
                     className="absolute right-0 top-full mt-2 w-56 rounded-2xl overflow-hidden z-50 animate-scale-in"
                     style={{
                       background: 'var(--surface-3)',
-                      border: '1px solid rgba(255,255,255,0.08)',
-                      boxShadow: '0 20px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(124,58,237,0.1)',
+                      border: '1px solid var(--border-subtle)',
+                      boxShadow: '0 10px 40px rgba(0,0,0,0.1)',
                     }}
                   >
-                    <div className="p-3 border-b border-white/[0.06]">
-                      <p className="text-sm font-semibold text-white/90 truncate">{user.fullName}</p>
+                    <div className="p-3 border-b" style={{ borderColor: 'var(--border-subtle)' }}>
+                      <p className="text-sm font-semibold text-[var(--text-primary)] truncate">{user.fullName}</p>
                       <p className="text-xs truncate" style={{ color: 'var(--text-muted)' }}>@{user.username}</p>
                     </div>
                     <div className="p-1.5">

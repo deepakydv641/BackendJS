@@ -117,7 +117,6 @@ export default function VideoDetailPage() {
 
     return (
         <div className="min-h-screen pb-12" style={{ background: 'var(--surface-1)' }}>
-            <Navbar />
             
             <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-6 animate-fade-in flex flex-col lg:flex-row gap-8">
                 

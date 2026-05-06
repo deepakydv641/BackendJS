@@ -53,8 +53,7 @@ export default function SearchPage() {
   }, [query]);
 
   return (
-    <div className="min-h-screen" style={{ background: 'var(--surface-1)' }}>
-      <Navbar />
+    <div className="min-h-screen">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 py-8 animate-slide-up">
 
