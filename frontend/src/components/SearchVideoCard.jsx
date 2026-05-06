@@ -89,7 +89,7 @@ export default function SearchVideoCard({ video, onDelete }) {
     setShowMenu(false);
     const toastId = toast.loading('Preparing download...');
     try {
-      const { data } = await videosApi.get(`\${import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com'}/api/v1/download/${video._id}`);
+      const { data } = await videosApi.get(`${import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com'}/api/v1/download/${video._id}`);
       const downloadUrl = data.data?.downloadUrl;
       if (downloadUrl) {
          const link = document.createElement('a');

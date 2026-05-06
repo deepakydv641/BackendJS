@@ -192,3 +192,45 @@ By switching to Comment.find().populate("owner"), we entirely bypass these stric
 - **Root Cause**: The `.env` file on the backend explicitly declared `CORS_ORIGIN=https://localhost:8000`. When the Vite frontend (running on `http://localhost:5173`) attempted a cross-origin request involving `withCredentials: true`, the browser initiated a Preflight Options check. The strict URL mismatch caused the browser to permanently Block the request for security violations.
 - **File Affected**: `.env`
 - **Fix**: Relaxed the variable to `CORS_ORIGIN=*`. Due to the dynamic configuration in Express `cors` middleware (`origin: process.env.CORS_ORIGIN === "*" ? true : ...`), setting `*` safely signals the backend to dynamically reflect the exact request origin, enabling successful Preflight handshakes.
+
+## 22. Elasticsearch Init Silent Failure
+- **Context**: The server was logging `ELASTICSEARCH_URL not set — skipping Elasticsearch init`, meaning the `videos` index was never created automatically.
+- **Root Cause**: `initElastic` in `src/db/elasticsearch.js` checked for an obsolete `ELASTICSEARCH_URL` environment variable, while the actual `Client` used `CLOUD_ID` and `ELASTIC_API_KEY`.
+- **File Affected**: `src/db/elasticsearch.js`
+- **Fix**: Updated the fallback check in `initElastic` to require `process.env.CLOUD_ID` and `process.env.ELASTIC_API_KEY` before attempting connection.
+
+## 23. Elasticsearch Data Desynchronization
+- **Context**: Updating or deleting videos in the MongoDB database did not reflect in the autocomplete Elasticsearch results.
+- **Root Cause**: The Elasticsearch integration in the backend controllers only indexed videos upon creation. It lacked explicit `update` and `delete` handlers, and relied on auto-generated Elasticsearch Document IDs rather than mapping them to the stable MongoDB `_id`.
+- **File Affected**: `src/controllers/video.controller.js`
+- **Fix**: Modified `uploadVideo` to explicitly assign the Elasticsearch document `id` as `createdVideo._id.toString()`. Added `client.update` and `client.delete` logic to `updateVideoDetails` and `deleteVideo` controllers respectively.
+
+## 24. Render Deployment Crash (Elasticsearch ConfigurationError)
+- **Context**: Deploying the backend to Render crashed immediately on startup with `ConfigurationError: Cloud ID must be a string`.
+- **Root Cause**: The deployed environment initially lacked the `CLOUD_ID` environment variable. Because the `Client` instance was exported synchronously at the top level of `src/utils/elasticsearch.js`, the missing variable triggered a hard crash during the Node module resolution phase, completely preventing the server from booting.
+- **File Affected**: `src/utils/elasticsearch.js`
+- **Fix**: Implemented graceful instantiation. The client is now only instantiated if the environment variables exist. If missing (e.g. during a deployment before configuring secrets), it exports a dummy object with empty asynchronous methods (`search`, `index`, `exists`) to allow the Node server to boot safely while logging a warning.
+
+## 25. Vercel Blank White Page (MIME Type Error)
+- **Context**: Deploying the React frontend to Vercel resulted in a completely blank screen, with the browser logging `Expected a JavaScript module script but the server responded with a MIME type of "text/html"`.
+- **Root Cause**: The `vercel.json` file contained an aggressive `routes` array mapping `/(.*)` directly to `/`. This intercepted legitimate requests for JavaScript and CSS asset chunks and incorrectly served the `index.html` structure in their place.
+- **File Affected**: `frontend/vercel.json`
+- **Fix**: Converted `routes` to `rewrites` and mapped `/(.*)` to `/index.html`. Vercel's `rewrites` securely fallback to `index.html` only when static filesystem assets (like `.js` bundles) are not explicitly found, effectively supporting React Router SPA navigation without breaking asset loading.
+
+## 26. Dynamic Frontend API Routing
+- **Context**: The frontend needed to reliably communicate with `http://localhost:8000` during local development, but switch to `https://vidstream-th0g.onrender.com` when deployed to Vercel without requiring manual `.env` configuration per environment.
+- **Root Cause**: Backend API base URLs were rigidly hardcoded as literal string primitives inside the Axios initialization and various template literals.
+- **File Affected**: `frontend/src/api/axios.js` and 12 other frontend files.
+- **Fix**: Replaced static URLs with a dynamic Vite environment variable ternary: `(import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com')`. Vite evaluates this at runtime locally, and statically injects the production URL when `npm run build` is executed by Vercel.
+
+## 27. Frontend Free-Tier Wake-Up Timeouts
+- **Context**: Render's free tier spins down idle instances, resulting in wake-up delays up to 50 seconds. This induced anxiety and perceived failure states during the Forgot Password OTP flow.
+- **Root Cause**: The Axios instances lacked explicit timeout tolerances, risking browser-level aborts. Furthermore, the OTP only remained valid for 5 minutes (which gets heavily depleted by the initial 1-minute server delay), and the UI provided zero feedback regarding backend sleeping states.
+- **File Affected**: `frontend/src/api/forgotPasswordApi.js`, `frontend/src/api/axios.js`, `frontend/src/pages/ForgotPasswordPage.jsx`, `src/controllers/forgotpassword.controller.js`
+- **Fix**: Injected `timeout: 120000` (2 minutes) to global Axios configs. Increased backend Redis OTP expiry (`EX: 600`) and UI text labels to 10 minutes. Finally, attached a delayed `setTimeout` toast in the UI that pops up after 5 seconds to reassuringly notify the user: "Our free server is waking up... this could take up to 60 seconds."
+
+## 28. Cross-Origin Credentials Forbidden Configuration
+- **Context**: Preflight API calls to the deployed backend failed on Vercel despite updating origins.
+- **Root Cause**: Modern browser security protocols strictly prohibit the `Access-Control-Allow-Origin: *` wildcard when HTTP requests explicitly carry `withCredentials: true` (cookies/authorization headers).
+- **File Affected**: `src/app.js`
+- **Fix**: Overrode the wildcard fallback in `cors(...)` with a custom functional array validation. Explicitly whitelisted specific environments (`"http://localhost:3000"`, `"http://localhost:5173"`, `"https://vid-stream-psxf.vercel.app"`) to correctly return matched strings as the distinct valid Origin header.
