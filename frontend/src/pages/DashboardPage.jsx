@@ -142,7 +142,7 @@ export default function DashboardPage() {
               {/* Cover */}
               <div className="relative h-36 sm:h-44 overflow-hidden">
                 {user?.coverImage ? (
-                  <img src={user.coverImage} alt="cover" className="w-full h-full object-cover" />
+                  <img src={user.coverImage} alt="cover" className="w-full h-full object-cover" loading="lazy" />
                 ) : (
                   <div className="w-full h-full" style={{
                     background: 'linear-gradient(135deg, rgba(124,58,237,0.3) 0%, rgba(79,70,229,0.2) 50%, rgba(6,182,212,0.15) 100%)',
@@ -168,7 +168,7 @@ export default function DashboardPage() {
                         boxShadow: '0 0 0 2px rgba(124,58,237,0.4), 0 8px 24px rgba(0,0,0,0.4)',
                       }}
                     >
-                      <img src={user?.avatar} alt="avatar" className="w-full h-full object-cover" />
+                      <img src={user?.avatar} alt="avatar" className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div
                       className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full border-2 flex items-center justify-center"
@@ -291,7 +291,7 @@ export default function DashboardPage() {
                   ) : (
                     subscribers.map(sub => (
                       <div key={sub._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                        <img src={sub.subscriberDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" />
+                        <img src={sub.subscriberDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" loading="lazy" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold truncate text-white">{sub.subscriberDetail?.[0]?.fullName}</p>
                           <p className="text-xs text-violet-400 truncate">@{sub.subscriberDetail?.[0]?.username}</p>
@@ -312,7 +312,7 @@ export default function DashboardPage() {
                   ) : (
                     subscribedTo.map(sub => (
                       <div key={sub._id} className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/5">
-                        <img src={sub.subscribedDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" />
+                        <img src={sub.subscribedDetail?.[0]?.avatar} alt="avatar" className="w-10 h-10 rounded-xl object-cover" loading="lazy" />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-bold truncate text-white">{sub.subscribedDetail?.[0]?.fullName}</p>
                           <p className="text-xs text-sky-400 truncate">@{sub.subscribedDetail?.[0]?.username}</p>

@@ -89,6 +89,7 @@ export default function TweetCard({ tweet, onDelete }) {
                                 src={owner.avatar.replace('http://', 'https://')}
                                 alt={owner.fullName}
                                 className="w-full h-full object-cover"
+                                loading="lazy"
                             />
                         ) : (
                             <div

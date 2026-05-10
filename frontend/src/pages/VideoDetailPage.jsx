@@ -152,7 +152,7 @@ export default function VideoDetailPage() {
                         <div className="flex items-center gap-3">
                             <div className="w-12 h-12 rounded-full overflow-hidden shrink-0" style={{ border: '2px solid rgba(124,58,237,0.3)' }}>
                                 {video.owner?.avatar ? (
-                                    <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" />
+                                    <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" loading="lazy" />
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-lg font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white' }}>
                                         {(video.owner?.fullName || 'U')[0].toUpperCase()}

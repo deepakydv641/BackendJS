@@ -151,7 +151,7 @@ export default function CommentSection({ videoId, tweetId }) {
             <div className="flex gap-4 mb-8">
                 <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden" style={{ border: '2px solid rgba(124,58,237,0.3)' }}>
                     {user?.avatar ? (
-                        <img src={user.avatar.replace('http://', 'https://')} alt="avatar" className="w-full h-full object-cover" />
+                        <img src={user.avatar.replace('http://', 'https://')} alt="avatar" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
                         <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white' }}>
                             {user?.fullName?.[0]?.toUpperCase() || 'U'}
@@ -225,7 +225,7 @@ export default function CommentSection({ videoId, tweetId }) {
                                 {/* Avatar */}
                                 <div className="w-10 h-10 rounded-full shrink-0 overflow-hidden cursor-pointer" style={{ border: '2px solid rgba(124,58,237,0.3)' }}>
                                     {owner?.avatar ? (
-                                        <img src={owner.avatar.replace('http://', 'https://')} alt="avatar" className="w-full h-full object-cover" />
+                                        <img src={owner.avatar.replace('http://', 'https://')} alt="avatar" className="w-full h-full object-cover" loading="lazy" />
                                     ) : (
                                         <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: 'linear-gradient(135deg, #7c3aed, #4f46e5)', color: 'white' }}>
                                             {(owner?.fullName || owner?.username || 'U')[0].toUpperCase()}

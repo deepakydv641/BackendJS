@@ -119,7 +119,7 @@ export default function ChannelPage() {
       {/* Top Banner / Cover */}
       <div className="w-full h-48 sm:h-64 md:h-80 relative overflow-hidden">
         {profile.coverImage ? (
-          <img src={profile.coverImage} alt="Cover" className="w-full h-full object-cover" />
+          <img src={profile.coverImage} alt="Cover" className="w-full h-full object-cover" loading="lazy" />
         ) : (
           <div className="w-full h-full" style={{ background: 'linear-gradient(90deg, #1e1e2f, #2d2b55, #1e1e2f)' }} />
         )}
@@ -133,7 +133,7 @@ export default function ChannelPage() {
           <div className="w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden shrink-0" 
                style={{ border: '4px solid var(--surface-1)', boxShadow: '0 8px 32px rgba(0,0,0,0.5)' }}>
             {profile.avatar ? (
-              <img src={profile.avatar} alt={profile.fullName} className="w-full h-full object-cover" />
+              <img src={profile.avatar} alt={profile.fullName} className="w-full h-full object-cover" loading="lazy" />
             ) : (
               <div className="w-full h-full flex items-center justify-center text-4xl font-bold text-white bg-violet-600">
                 {profile.fullName?.[0]?.toUpperCase()}

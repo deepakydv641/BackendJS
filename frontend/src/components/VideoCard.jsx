@@ -168,6 +168,7 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
           src={video.thumbnail?.replace('http://', 'https://')}
           alt={video.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          loading="lazy"
         />
 
             {/* Gradient overlay */}
@@ -228,7 +229,7 @@ export default function VideoCard({ video, onDelete, showActions = false }) {
         {/* Avatar */}
         <div className="w-9 h-9 rounded-xl shrink-0 overflow-hidden" style={{ border: '2px solid rgba(124,58,237,0.15)' }}>
           {video.owner?.avatar ? (
-            <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" />
+            <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" loading="lazy" />
           ) : (
             <div className="w-full h-full flex items-center justify-center text-sm font-bold" style={{ background: 'var(--brand-primary)', color: 'white' }}>
               {(video.owner?.fullName || video.owner?.username || 'U')[0].toUpperCase()}

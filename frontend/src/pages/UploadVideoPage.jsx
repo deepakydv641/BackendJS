@@ -83,7 +83,7 @@ export default function UploadVideoPage() {
           }}
         >
           {preview ? (
-            <img src={preview} alt="preview" className="absolute inset-0 w-full h-full object-cover" />
+            <img src={preview} alt="preview" className="absolute inset-0 w-full h-full object-cover" loading="lazy" />
           ) : null}
           <div className="relative z-10 flex flex-col items-center gap-3" style={{ opacity: preview ? 0 : 1 }}>
             <div

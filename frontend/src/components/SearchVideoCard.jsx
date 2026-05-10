@@ -148,6 +148,7 @@ export default function SearchVideoCard({ video, onDelete }) {
           src={video.thumbnail?.replace('http://', 'https://')}
           alt={video.title}
           className={`w-full h-full object-cover transition-transform duration-500 ${hovered ? 'scale-105' : 'scale-100'}`}
+          loading="lazy"
         />
         <div className={`absolute inset-0 transition-opacity duration-300 bg-black/20 ${hovered ? 'opacity-100' : 'opacity-0'}`} />
         
@@ -228,7 +229,7 @@ export default function SearchVideoCard({ video, onDelete }) {
         <div className="flex items-center gap-2 mt-4 cursor-default w-fit" onClick={(e) => e.stopPropagation()}>
           <div className="w-6 h-6 rounded-full overflow-hidden bg-gray-200 cursor-pointer" onClick={() => navigate(`/channel/${video.owner?.username}`)}>
              {video.owner?.avatar ? (
-                <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" />
+                <img src={video.owner.avatar.replace('http://', 'https://')} alt="author" className="w-full h-full object-cover" loading="lazy" />
              ) : (
                 <div className="w-full h-full flex items-center justify-center text-[10px] font-bold bg-[var(--brand-primary)] text-white">
                    {(video.owner?.fullName || video.owner?.username || 'U')[0].toUpperCase()}

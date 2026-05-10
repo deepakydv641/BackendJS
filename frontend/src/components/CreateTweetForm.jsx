@@ -61,7 +61,7 @@ export default function CreateTweetForm({ onTweetCreated }) {
                     style={{ border: '2px solid rgba(229,9,20,0.35)' }}
                 >
                     {user?.avatar ? (
-                        <img src={user.avatar.replace('http://', 'https://')} alt="me" className="w-full h-full object-cover" />
+                        <img src={user.avatar.replace('http://', 'https://')} alt="me" className="w-full h-full object-cover" loading="lazy" />
                     ) : (
                         <div
                             className="w-full h-full flex items-center justify-center font-bold text-white"
@@ -93,7 +93,7 @@ export default function CreateTweetForm({ onTweetCreated }) {
                 {/* Image Preview */}
                 {preview && (
                     <div className="relative rounded-xl overflow-hidden" style={{ border: '1px solid var(--border-medium)' }}>
-                        <img src={preview} alt="Preview" className="w-full max-h-[320px] object-cover" />
+                        <img src={preview} alt="Preview" className="w-full max-h-[320px] object-cover" loading="lazy" />
                         <button
                             type="button"
                             onClick={clearImage}

@@ -59,7 +59,7 @@ function AvatarUpload({ preview, onFile }) {
     >
       {preview ? (
         <>
-          <img src={preview} alt="avatar" className="w-full h-full object-cover" />
+          <img src={preview} alt="avatar" className="w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
             <span className="text-white text-xs font-semibold">Change</span>
           </div>
@@ -94,7 +94,7 @@ function CoverUpload({ preview, onFile }) {
     >
       {preview ? (
         <>
-          <img src={preview} alt="cover" className="w-full h-full object-cover" />
+          <img src={preview} alt="cover" className="w-full h-full object-cover" loading="lazy" />
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity">
             <span className="text-white text-xs font-semibold">Change</span>
           </div>

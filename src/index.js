@@ -1,4 +1,5 @@
 // dotenv MUST be loaded before any other imports that use process.env
+// sabse phele ye index.js file run hoti hai , so that connection with the database and with the elastic search can be elstabilished.
 import dotenv from "dotenv";
 import path from "path";
 

@@ -294,7 +294,7 @@ export default function Navbar() {
                     className="w-9 h-9 rounded-xl overflow-hidden border-2 transition-all duration-200"
                     style={{ borderColor: menuOpen ? 'rgba(255,255,255,0.8)' : 'rgba(255,255,255,0.3)' }}
                   >
-                    <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" />
+                    <img src={user.avatar} alt="avatar" className="w-full h-full object-cover" loading="lazy" />
                   </div>
                   <svg
                     className={`w-3.5 h-3.5 transition-transform duration-200 hidden sm:block text-white/70`}
