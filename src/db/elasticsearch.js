@@ -9,10 +9,11 @@ export const initElastic = async () => {
     }
 
     try {
+        console.log("yha tk al right hai sab ");
         const indexName = "videos";
-
+        console.log("yha tk al right hai sab ");
         const exists = await client.indices.exists({ index: indexName });
-
+        console.log("yha tk al right hai sab ");
         if (!exists) {
             await client.indices.create({
                 index: indexName,

@@ -92,7 +92,7 @@ export default function Sidebar() {
               key={link.label}
               to={link.to}
               state={link.navState}
-              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 ${
+              className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium ${
                 active ? 'text-white' : 'text-white/60 hover:text-white hover:bg-white/5'
               }`}
               style={{ background: active ? 'var(--sidebar-active)' : 'transparent' }}
@@ -107,7 +107,7 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="p-6 text-xs text-white/30">
+      <div className="p-6 text-xs text-white/30 transition-all duration-300 hover:scale-105 hover:text-white/50">
         <p>© {new Date().getFullYear()} VidStream</p>
       </div>
     </div>

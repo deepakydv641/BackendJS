@@ -9,6 +9,7 @@ import router4 from './routes/tweet.routes.js';
 import router5 from './routes/search.routes.js';
 import router6 from './routes/like.routes.js';
 import downloadRouter from './routes/download.routes.js';
+import { rateLimiter } from './middlewares/rate-limiter.middleware.js';
 
 const app = express();
 
@@ -39,7 +40,7 @@ app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
-
+app.use("/api/v1",rateLimiter)  // used for all routes under /api/v1  to avoid to count the images requests it was doing before 
 console.log("Registering user routes at /api/v1/users");
 app.get("/", (req, res) => {
     res.send("Backend is running 🚀");

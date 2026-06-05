@@ -3,6 +3,7 @@ import { loginUser, registerUser, logoutUser, getRefreshedAccessToken, getCurren
 import { forgotPassword, otpValidation, resetPassword } from "../controllers/forgotpassword.controller.js";
 import { upload } from "../middlewares/multer.middleware.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { rateLimiter } from "../middlewares/rate-limiter.middleware.js";
 
 const router = Router();
 
@@ -18,7 +19,7 @@ router.route("/register").post(
 
 console.log("Login route registered");
 // Use upload.none() to accept form-data that has no files, only text fields
-router.route("/login").post(upload.none(), loginUser);
+router.route("/login").post(rateLimiter, upload.none(), loginUser);
 
 console.log("Logout route registered");
 router.route("/logout").post(verifyJWT, logoutUser);

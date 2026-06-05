@@ -186,11 +186,13 @@ const getLikedVideos = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Failed to fetch videos")
     }
 
+    const validVideoList = videoList.filter(like => like.video !== null)
+
     return res.status(200)
         .json(
             new ApiResponse(
                 200,
-                videoList,
+                validVideoList,
                 "Videos Fetched successfully"
             )
         )

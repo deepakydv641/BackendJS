@@ -1,5 +1,5 @@
 import { lazy, Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import { useAuth } from './context/AuthContext';
 import Spinner from './components/Spinner';
 import Layout from './components/Layout';
@@ -22,8 +22,9 @@ const LandingPage = lazy(() => import('./pages/LandingPage'));
 
 function PrivateRoute({ children }) {
   const { user, loading } = useAuth();
-  if (loading) return <Spinner fullScreen />;
-  return user ? children : <Navigate to="/login" replace />;
+  if (loading) return <div className="flex-1 flex items-center justify-center"><Spinner /></div>;
+  if (!user) return <Navigate to="/login" replace />;
+  return children;
 }
 
 function GuestRoute({ children }) {
@@ -40,17 +41,19 @@ export default function App() {
         <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
         <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
         <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
-        <Route path="/home" element={<PrivateRoute><Layout><HomePage /></Layout></PrivateRoute>} />
-        <Route path="/dashboard" element={<PrivateRoute><Layout><DashboardPage /></Layout></PrivateRoute>} />
-        <Route path="/change-password" element={<PrivateRoute><Layout><ChangePasswordPage /></Layout></PrivateRoute>} />
-        <Route path="/update-account" element={<PrivateRoute><Layout><UpdateAccountPage /></Layout></PrivateRoute>} />
-        <Route path="/upload-video" element={<PrivateRoute><Layout><UploadVideoPage /></Layout></PrivateRoute>} />
-        <Route path="/edit-video/:videoId" element={<PrivateRoute><Layout><EditVideoPage /></Layout></PrivateRoute>} />
-        <Route path="/video/:videoId" element={<PrivateRoute><Layout><VideoDetailPage /></Layout></PrivateRoute>} />
-        <Route path="/channel/:username" element={<PrivateRoute><Layout><ChannelPage /></Layout></PrivateRoute>} />
-        <Route path="/search/:query" element={<PrivateRoute><Layout><SearchPage /></Layout></PrivateRoute>} />
-        <Route path="/liked-videos" element={<PrivateRoute><Layout><LikedVideosPage /></Layout></PrivateRoute>} />
-        <Route path="/history" element={<PrivateRoute><Layout><HistoryPage /></Layout></PrivateRoute>} />
+        <Route path="/" element={<Layout><Outlet /></Layout>}>
+          <Route path="home" element={<PrivateRoute><HomePage /></PrivateRoute>} />
+          <Route path="dashboard" element={<PrivateRoute><DashboardPage /></PrivateRoute>} />
+          <Route path="change-password" element={<PrivateRoute><ChangePasswordPage /></PrivateRoute>} />
+          <Route path="update-account" element={<PrivateRoute><UpdateAccountPage /></PrivateRoute>} />
+          <Route path="upload-video" element={<PrivateRoute><UploadVideoPage /></PrivateRoute>} />
+          <Route path="edit-video/:videoId" element={<PrivateRoute><EditVideoPage /></PrivateRoute>} />
+          <Route path="video/:videoId" element={<PrivateRoute><VideoDetailPage /></PrivateRoute>} />
+          <Route path="channel/:username" element={<PrivateRoute><ChannelPage /></PrivateRoute>} />
+          <Route path="search/:query" element={<PrivateRoute><SearchPage /></PrivateRoute>} />
+          <Route path="liked-videos" element={<PrivateRoute><LikedVideosPage /></PrivateRoute>} />
+          <Route path="history" element={<PrivateRoute><HistoryPage /></PrivateRoute>} />
+        </Route>
         <Route path="*" element={<Navigate to="/login" replace />} />
       </Routes>
     </Suspense>
