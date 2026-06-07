@@ -2,6 +2,7 @@
 // sabse phele ye index.js file run hoti hai , so that connection with the database and with the elastic search can be elstabilished.
 import dotenv from "dotenv";
 import path from "path";
+import dns from "dns";
 
 dotenv.config({
     path: path.resolve(process.cwd(), ".env")  // always resolves from the root folder where you run `npm run dev`
@@ -10,6 +11,8 @@ dotenv.config({
 import ConnectDB from "./db/index.js";
 import app from "./app.js";
 import { initElastic } from "./db/elasticsearch.js";
+
+dns.setDefaultResultOrder('ipv4first');
 
 ConnectDB()
     .then(async () => {
