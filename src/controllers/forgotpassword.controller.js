@@ -41,6 +41,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
         console.log('✅ [FORGOT PASSWORD] OTP stored in Redis successfully');
 
         console.log('📧 [FORGOT PASSWORD] Attempting to send email to:', userExist.email);
+        console.log("TO:", userExist.email);
+        console.log("FROM:", process.env.EMAIL);
+        console.log("PASS EXISTS:", !!process.env.EMAIL_PASS);
         await sendMail(
             userExist.email,
             "Your OTP Code",
