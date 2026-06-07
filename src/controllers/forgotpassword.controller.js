@@ -7,9 +7,9 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js"
 import { Comment } from "../models/comment.model.js";
 import { Tweet } from "../models/tweet.model.js";
-import { redisSet, redisGet } from "../db/redis.js";
+// import { redisSet, redisGet } from "../db/redis.js";
 import { sendMail } from "./mailer.controller.js";
-
+import { redisClient } from "../db/redis.js";
 
 
 const generateOtp = () => {
@@ -35,10 +35,9 @@ const forgotPassword = asyncHandler(async (req, res) => {
 
     const otp = generateOtp();
     console.log(`\n🔑 [DEV ONLY] Generated OTP for ${emailId}: ${otp}\n`);
-
     try {
         console.log('🔍 [FORGOT PASSWORD] Storing OTP in Redis...');
-        await redisSet(`otp:${emailId}`, otp, { EX: 300 })
+        redisClient.set(`otp:${emailId}`, otp, 'EX', 300);
         console.log('✅ [FORGOT PASSWORD] OTP stored in Redis successfully');
 
         console.log('📧 [FORGOT PASSWORD] Attempting to send email to:', userExist.email);
@@ -81,7 +80,7 @@ const otpValidation = asyncHandler(async (req, res) => {
         throw new ApiError(400, "Missing OTP or email")
     }
 
-    const otpFromRedis = await redisGet(`otp:${emailId}`)
+    const otpFromRedis = await redisClient.get(`otp:${emailId}`)
 
     if (!otpFromRedis) {
         throw new ApiError(400, "Something Went Wrong")
