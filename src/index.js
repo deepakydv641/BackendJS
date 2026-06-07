@@ -13,6 +13,16 @@ import app from "./app.js";
 import { initElastic } from "./db/elasticsearch.js";
 
 dns.setDefaultResultOrder('ipv4first');
+console.log("✅ DNS order forced to IPv4 first");
+
+// Debug DNS resolution for Gmail SMTP
+dns.lookup("smtp.gmail.com", { all: true }, (err, addresses) => {
+    if (err) {
+        console.log("❌ DNS lookup error:", err.message);
+    } else {
+        console.log("📡 SMTP Gmail DNS addresses:", addresses);
+    }
+});
 
 ConnectDB()
     .then(async () => {
