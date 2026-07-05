@@ -4,42 +4,30 @@ import dotenv from "dotenv";
 import path from "path";
 import dns from "dns";
 
-dotenv.config({
-    path: path.resolve(process.cwd(), ".env")  // always resolves from the root folder where you run `npm run dev`
-});
+dotenv.config();
 
 import ConnectDB from "./db/index.js";
 import app from "./app.js";
 import { initElastic } from "./db/elasticsearch.js";
 
 dns.setDefaultResultOrder('ipv4first');
-console.log("✅ DNS order forced to IPv4 first");
-
-// Debug DNS resolution for Gmail SMTP
-dns.lookup("smtp.gmail.com", { all: true }, (err, addresses) => {
-    if (err) {
-        console.log("❌ DNS lookup error:", err.message);
-    } else {
-        console.log("📡 SMTP Gmail DNS addresses:", addresses);
-    }
-});
 
 ConnectDB()
     .then(async () => {
         try {
             await initElastic();
         } catch (err) {
-            console.error("❌ Elasticsearch init failed (server will still start):", err.message);
+            console.log('error in initElastic:', err.message);
         }
         app.on("error", (error) => {
-            console.log("App error:", error)
+            console.log('error in app:', error.message)
             throw error
         })
         app.listen(process.env.PORT || 8000, () => {
-            console.log("Server is running on port", process.env.PORT || 8000);
+            console.log('Server is running on port', process.env.PORT || 8000);
         })
     })
     .catch((error) => {
-        console.log("Error connecting to database:", error);
+        console.log('error in ConnectDB:', error.message);
         process.exit(1);
     })

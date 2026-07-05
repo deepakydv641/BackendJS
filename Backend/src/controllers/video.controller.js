@@ -71,7 +71,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
             }
         });
     } catch (error) {
-        console.log(error)
+        console.log('error in uploadVideo elasticsearch:', error.message);
     }
 
     return res.status(201).json(
@@ -82,6 +82,7 @@ const uploadVideo = asyncHandler(async (req, res) => {
 
 const getAllVideos = asyncHandler(async (req, res) => {
     const videoList = await Video.find().populate("owner", "fullName username avatar createdAt");
+    console.log("Video list:", videoList);
     return res.status(200)
         .json(
             new ApiResponse(200, videoList, "Videos fetched successfully")
@@ -152,7 +153,7 @@ const updateVideoDetails = asyncHandler(async (req, res) => {
             }
         });
     } catch (error) {
-        console.log("Elasticsearch update failed:", error);
+        console.log('error in updateVideoDetails elasticsearch:', error.message);
     }
 
     return res.status(200)
@@ -218,7 +219,7 @@ const deleteVideo = asyncHandler(async (req, res) => {
             id: videoId
         });
     } catch (error) {
-        console.log("Elasticsearch delete failed:", error);
+        console.log('error in deleteVideo elasticsearch:', error.message);
     }
 
     // TODO: Ideally, you should also delete the video and thumbnail from Cloudinary here

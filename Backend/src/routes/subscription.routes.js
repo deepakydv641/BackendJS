@@ -5,8 +5,6 @@ import { getSubscribers, getAllSubscribed, toggleSubscription } from "../control
 
 const router2 = Router();
 
-console.log("Registering videos routes");
-
 router2.route("/get-subscribers/:userId").get(
     verifyJWT,
     getSubscribers

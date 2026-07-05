@@ -162,21 +162,31 @@ const getTweetsOfUser = asyncHandler(async (req, res) => {
 
 })
 
-const getAllTweets = asyncHandler(async (req, res) => {
+const getAllTweets = async (req, res) => {
+    try {
+        const tweets = await Tweet.find()
+            .populate("owner", "username avatar fullName")
+            .sort({ createdAt: -1 });
+        console.log(tweets);
+        return res.status(200)
+            .json(
+                new ApiResponse(
+                    200,
+                    tweets,
+                    "All tweets fetched successfully")
+            )
+    } catch (error) {
+        console.error('Error fetching all tweets:', error);
+        return res.status(500)
+            .json(
+                new ApiResponse(
+                    500,
+                    [],
+                    "Error fetching tweets")
+            )
+    }
 
-    const tweets = await Tweet.find()
-        .populate("owner", "username avatar fullName")
-        .sort({ createdAt: -1 });
-
-    return res.status(200)
-        .json(
-            new ApiResponse(
-                200,
-                tweets,
-                "All tweets fetched successfully")
-        )
-
-})
+}
 export {
     createTweet,
     deleteTweet,

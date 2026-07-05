@@ -7,8 +7,6 @@ import { rateLimiter } from "../middlewares/rate-limiter.middleware.js";
 
 const router = Router();
 
-console.log("Registering user routes");
-
 router.route("/register").post(
     upload.fields([
         { name: "avatar", maxCount: 1 },
@@ -17,11 +15,9 @@ router.route("/register").post(
     registerUser
 );
 
-console.log("Login route registered");
 // Use upload.none() to accept form-data that has no files, only text fields
 router.route("/login").post(rateLimiter, upload.none(), loginUser);
 
-console.log("Logout route registered");
 router.route("/logout").post(verifyJWT, logoutUser);
 router.route("/refresh-access-token").post(getRefreshedAccessToken)
 router.route("/change-password").patch(verifyJWT, changeCurrentPassword)

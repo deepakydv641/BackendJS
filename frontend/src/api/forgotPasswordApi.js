@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const forgotPasswordApi = axios.create({
-  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users',
+  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users',
   withCredentials: true,
   timeout: 120000, // 2 minutes to allow Render free tier to wake up
 });

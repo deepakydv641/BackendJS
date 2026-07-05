@@ -7,7 +7,7 @@ import { uploadOnCloudinary } from "../utils/cloudinary.js";
 import { Like } from "../models/like.model.js"
 import { Comment } from "../models/comment.model.js";
 import { Tweet } from "../models/tweet.model.js";
-// import { redisSet, redisGet } from "../db/redis.js";
+import { redisSet, redisGet } from "../db/redis.js";
 import { sendMail } from "./mailer.controller.js";
 import { redisClient } from "../db/redis.js";
 
@@ -23,33 +23,20 @@ const forgotPassword = asyncHandler(async (req, res) => {
         throw new ApiError(400, "You missed email")
     }
 
-    console.log('🔍 [FORGOT PASSWORD] Looking for user with email:', emailId);
     const userExist = await User.findOne({ email: emailId })
 
     if (!userExist) {
-        console.log('❌ [ERROR] User not found for email:', emailId);
         throw new ApiError(400, "User not found")
     }
 
-    console.log('✅ [FORGOT PASSWORD] User found:', userExist.username || userExist.email);
-
     const otp = generateOtp();
-    console.log(`\n🔑 [DEV ONLY] Generated OTP for ${emailId}: ${otp}\n`);
     try {
-        console.log('🔍 [FORGOT PASSWORD] Storing OTP in Redis...');
         redisClient.set(`otp:${emailId}`, otp, 'EX', 300);
-        console.log('✅ [FORGOT PASSWORD] OTP stored in Redis successfully');
-
-        console.log('📧 [FORGOT PASSWORD] Attempting to send email to:', userExist.email);
-        console.log("TO:", userExist.email);
-        console.log("FROM:", process.env.EMAIL);
-        console.log("PASS EXISTS:", !!process.env.EMAIL_PASS);
         await sendMail(
             userExist.email,
             "Your OTP Code",
             `Your OTP is: ${otp}. It expires in 5 minutes.`
         );
-        console.log('✅ [FORGOT PASSWORD] Email sent successfully!');
 
         return res.status(200)
             .json(
@@ -60,10 +47,7 @@ const forgotPassword = asyncHandler(async (req, res) => {
                 )
             )
     } catch (error) {
-        console.log('❌ [FORGOT PASSWORD] Email sending failed');
-        console.log('❌ [ERROR] Details:', error.message);
-        console.log('❌ [ERROR] Full error:', error);
-        console.log('❌ [ERROR] Stack:', error.stack);
+        console.log('error in forgotPassword:', error.message);
 
         return res.status(500)
             .json(

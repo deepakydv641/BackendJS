@@ -13,38 +13,22 @@ import { rateLimiter } from './middlewares/rate-limiter.middleware.js';
 
 const app = express();
 
-const allowedOrigins = [
-    "http://localhost:3000",
-    "http://localhost:5173",
-    "https://vid-stream-psxf.vercel.app"
-];
+// Trust proxy for nginx reverse proxy
+// app.set('trust proxy', true);
 
+
+const port = process.env.PORT || 8000;
 app.use(cors({
-    origin: function (origin, callback) {
-        // Allow requests with no origin (like Postman or curl) or if origin is in the allowed list
-        if (!origin || allowedOrigins.includes(origin)) {
-            callback(null, true);
-        } else {
-            // Also fallback to CORS_ORIGIN from env if it exists and matches
-            if (process.env.CORS_ORIGIN === "*" || process.env.CORS_ORIGIN === origin) {
-                 callback(null, true);
-            } else {
-                 callback(new Error('Not allowed by CORS'));
-            }
-        }
-    },
-    credentials: true
+    origin:true,
+    credentials:true
 }))
+
 
 app.use(express.json({ limit: "16kb" }))
 app.use(express.urlencoded({ extended: true, limit: "16kb" }))
 app.use(express.static("public"))
 app.use(cookieParser())
-app.use("/api/v1",rateLimiter)  // used for all routes under /api/v1  to avoid to count the images requests it was doing before 
-console.log("Registering user routes at /api/v1/users");
-app.get("/", (req, res) => {
-    res.send("Backend is running 🚀");
-});
+app.use("/api/v1",rateLimiter)  // used for all routes under /api/v1  to avoid to count the images requests it was doing before
 app.use("/api/v1/users", router)
 app.use("/api/v1/videos", router1)
 app.use("/api/v1/subscriptions", router2)
@@ -56,8 +40,7 @@ app.use("/api/v1/download", downloadRouter)
 
 // Global error handler — catches errors thrown by asyncHandler
 app.use((err, req, res, next) => {
-    console.error("Error occurred:", err);
-    console.error("Stack trace:", err.stack);
+    console.log('error in global error handler:', err.message);
 
     const statusCode = err.statusCode || 500;
     res.status(statusCode).json({
@@ -66,5 +49,19 @@ app.use((err, req, res, next) => {
         errors: err.errors || []
     });
 });
+
+app.listen(port, () => {
+    console.log(`Server is running on port ${port}`);
+});
+
+app.get("/",(req,res)=>{
+    // Perform a CPU-intensive task
+    // let sum = 0;
+    // for (let i = 0; i < 100000000; i++) {
+    //     sum += i;
+    // }
+    // console.log(`${port} is serving requests`);
+    res.status(200).json({ message: `${port} is serving requests` });
+})
 
 export default app;

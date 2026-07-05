@@ -5,8 +5,6 @@ import { uploadVideo, getAllVideos, updateVideoDetails, getYourVideos, deleteVid
 
 const router1 = Router();
 
-console.log("Registering videos routes");
-
 router1.route("/upload-video").post(
     verifyJWT,
     upload.fields([

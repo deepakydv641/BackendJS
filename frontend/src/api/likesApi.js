@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const likesApi = axios.create({
-  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/likes',
+  baseURL: (import.meta.env.MODE === 'development' ? 'http://localhost' : 'https://vidstream-th0g.onrender.com') + '/api/v1/likes',
   withCredentials: true,
 });
 
@@ -31,7 +31,7 @@ likesApi.interceptors.response.use(
       original._retry = true;
       try {
         const { data } = await axios.post(
-          (import.meta.env.MODE === 'development' ? 'http://localhost:8000' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users/refresh-access-token',
+          (import.meta.env.MODE === 'development' ? 'http://localhost' : 'https://vidstream-th0g.onrender.com') + '/api/v1/users/refresh-access-token',
           {},
           { withCredentials: true }
         );

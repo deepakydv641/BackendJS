@@ -62,10 +62,15 @@ export default function HomePage() {
   };
 
   useEffect(() => {
-    videosApi.get('/all-videos')
-      .then(({ data }) => setVideos(data.data || []))
-      .catch(() => toast.error('Failed to load videos'))
-      .finally(() => setVideosLoading(false));
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      videosApi.get('/all-videos')
+        .then(({ data }) => setVideos(data.data || []))
+        .catch(() => toast.error('Failed to load videos'))
+        .finally(() => setVideosLoading(false));
+    } else {
+      setVideosLoading(false);
+    }
 
     fetchTweets();
   }, []);

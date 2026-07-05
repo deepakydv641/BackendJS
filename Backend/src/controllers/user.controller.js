@@ -124,10 +124,14 @@ const loginUser = asyncHandler(async (req, res) => {
     const loggedInUser = await User.findById(userExist._id).select("-password -refreshToken")
 
     // Set cookies — httpOnly prevents XSS attacks, cookies can only be managed from server
+    // req.secure correctly detects HTTPS even through nginx (because trust proxy is set)
     const options = {
         httpOnly: true,
-        secure: true
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+        sameSite: 'lax'
     }
+    console.log("AccessToken:", accessToken);
+    console.log("RefreshToken:", refreshToken);
 
     return res.status(200)
         .cookie("accessToken", accessToken, options)
@@ -160,7 +164,8 @@ const logoutUser = asyncHandler(async (req, res) => {
 
     const options = {
         httpOnly: true,
-        secure: true
+        secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+        sameSite: 'lax'
     }
 
     return res.status(200)
@@ -172,17 +177,16 @@ const logoutUser = asyncHandler(async (req, res) => {
 })
 
 const getRefreshedAccessToken = asyncHandler(async (req, res) => {
+    // this is called when the access token is expired
 
     const incomingRefreshToken = req.cookies.refreshToken || req.body.refreshToken  // req.body.refreshtoken is for mobiles
-
+    console.log("Incoming refresh token:", incomingRefreshToken)
     if (!incomingRefreshToken) {
         throw new ApiError(401, "Unauthorized request")
     }
 
     const decodedToken = jwt.verify(incomingRefreshToken, process.env.REFRESH_TOKEN_SECRET)
 
-
-    try {
         if (!decodedToken) {
             throw new ApiError(401, "Invalid refresh token")
         }
@@ -197,11 +201,12 @@ const getRefreshedAccessToken = asyncHandler(async (req, res) => {
             throw new ApiError(401, "Invalid refresh token")
         }
 
-        const { accessToken, newRefreshToken } = await generateAccessAndRefreshToken(DB_User._id)
+        const { accessToken, refreshToken: newRefreshToken } = await generateAccessAndRefreshToken(DB_User._id)
 
         const options = {
             httpOnly: true,
-            secure: true
+            secure: req.secure || req.headers['x-forwarded-proto'] === 'https',
+            sameSite: 'lax'
         }
 
         return res
@@ -219,11 +224,7 @@ const getRefreshedAccessToken = asyncHandler(async (req, res) => {
                 )
             )
     }
-    catch (error) {
-        throw new ApiError(401, error?.message || "Invalid refresh token")
-    }
-
-})
+)
 
 const changeCurrentPassword = asyncHandler(async (req, res) => {
 

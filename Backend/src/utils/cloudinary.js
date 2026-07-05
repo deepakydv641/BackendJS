@@ -9,7 +9,6 @@ cloudinary.config({
 
 // File flow: user → upload → local temp server → cloudinary → delete local file
 const uploadOnCloudinary = async (localFilePath) => {
-    console.log("Cloudinary Config:", process.env.CLOUDINARY_CLOUD_NAME ? "Loaded" : "Missing");
     try {
         if (!localFilePath) return null;
 
@@ -17,7 +16,6 @@ const uploadOnCloudinary = async (localFilePath) => {
             resource_type: "auto"
         });
 
-        console.log("File uploaded to Cloudinary:", response.secure_url);
 
         // Always delete the local temp file after successful upload
         if (fs.existsSync(localFilePath)) {
@@ -26,7 +24,7 @@ const uploadOnCloudinary = async (localFilePath) => {
 
         return response;
     } catch (error) {
-        console.error("Cloudinary Upload Error:", error);
+        console.log('error in uploadOnCloudinary:', error.message);
         // Delete the local temp file on failure too (prevent disk accumulation)
         if (fs.existsSync(localFilePath)) {
             fs.unlinkSync(localFilePath);
